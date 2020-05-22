@@ -643,10 +643,10 @@ public class EglRenderer implements VideoSink {
     drawMatrix.preTranslate(-0.5f, -0.5f);
 
     if (shouldRenderFrame) {
-      GLES20.glClearColor(0 /* red */, 0 /* green */, 0 /* blue */, 0 /* alpha */);
+      GLES20.glClearColor(0, 0, 0, 0);
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-      frameDrawer.drawFrame(frame, drawer, drawMatrix, 0 /* viewportX */, 0 /* viewportY */,
-          eglBase.surfaceWidth(), eglBase.surfaceHeight());
+      frameDrawer.drawFrame(frame, drawer, drawMatrix,0,0,
+              eglBase.surfaceWidth(), eglBase.surfaceHeight());
 
       final long swapBuffersStartTimeNs = System.nanoTime();
       if (usePresentationTimeStamp) {

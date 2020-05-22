@@ -3,6 +3,7 @@ package com.dds.skywebrtc;
 import android.content.Context;
 import android.util.Log;
 
+
 import com.dds.skywebrtc.except.NotInitializedException;
 import com.dds.skywebrtc.inter.ISkyEvent;
 
@@ -53,7 +54,7 @@ public class SkyEngineKit {
                     .setPassword("123456")
                     .createIceServer();
             avEngineKit.iceServers.add(var11);
-            avEngineKit.iceServers.add(var12);
+            //avEngineKit.iceServers.add(var12);
             avEngineKit.iceServers.add(var13);
 
         }
@@ -61,10 +62,8 @@ public class SkyEngineKit {
 
 
     // 拨打电话
-    public boolean startOutCall(Context context,
-                                final String room,
-                                final String targetId,
-                                final boolean audioOnly) {
+    public boolean startOutCall(Context context, final String room,
+                                final String targetId, final boolean audioOnly) {
         // 未初始化
         if (avEngineKit == null) {
             Log.e(TAG, "startOutCall error,please init first");
@@ -83,16 +82,13 @@ public class SkyEngineKit {
         mCurrentCallSession.setTargetId(targetId);
         mCurrentCallSession.setIsComing(false);
         mCurrentCallSession.setCallState(EnumType.CallState.Outgoing);
-        // 创建房间
-        mCurrentCallSession.createHome(room, 2);
+        mCurrentCallSession.createHome(room, 2); // 创建房间
         return true;
     }
 
     // 接听电话
-    public boolean startInCall(Context context,
-                               final String room,
-                               final String targetId,
-                               final boolean audioOnly) {
+    public boolean startInCall(Context context, final String room,
+                               final String targetId, final boolean audioOnly) {
         if (avEngineKit == null) {
             Log.e(TAG, "startInCall error,init is not set");
             return false;
@@ -118,8 +114,6 @@ public class SkyEngineKit {
         // 开始响铃并回复
         mCurrentCallSession.shouldStartRing();
         mCurrentCallSession.sendRingBack(targetId);
-
-
         return true;
     }
 

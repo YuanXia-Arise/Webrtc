@@ -29,6 +29,8 @@ allprojects {
             name 'Google'
         }
         maven { url 'https://raw.githubusercontent.com/saki4510t/libcommon/master/repository/' }
+
+        maven { url "https://jitpack.io" }
     }
 }
 
@@ -49,4 +51,10 @@ ext {
     versionNameString = '1.2.1.20200414'
     javaSourceCompatibility = JavaVersion.VERSION_1_8
     javaTargetCompatibility = JavaVersion.VERSION_1_8
+}
+
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xmaxerrs" << "500" // or whatever number you want
+    }
 }

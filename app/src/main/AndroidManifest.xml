@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.dds.webrtc">
+    package="org.easydarwin.easypusher">
     <!-- 设置视频直播权限 -->
     <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.usb.host" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -17,28 +16,36 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />  <!--悬浮窗显示-->
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.usb.host"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_LOGS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <application
-        android:name="com.dds.App"
+        android:name="org.easydarwin.easypusher.EasyApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.dds.java.voip.CallMultiActivity" />
+        <activity android:name="org.java.voip.CallMultiActivity" />
+        <!--android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleInstance"
+            <action android:name="android.intent.action.VIEW" />-->
         <activity
-            android:name="com.dds.LauncherActivity"
+            android:name="org.easydarwin.easypusher.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleInstance"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -52,11 +59,11 @@
             <!--USB END-->
         </activity>
 
-        <activity android:name="com.dds.java.JavaActivity" />
+        <activity android:name="org.java.JavaActivity" />
 
         <!-- ======================java====================== -->
         <activity
-            android:name="com.dds.java.voip.CallSingleActivity"
+            android:name="org.java.voip.CallSingleActivity"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
@@ -69,7 +76,11 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.dds.java.voip.VoipReceiver">
+        <activity
+            android:name="org.easydarwin.easypusher.SettingActivity"
+            android:screenOrientation="portrait" />
+
+        <receiver android:name="org.java.voip.VoipReceiver">
             <intent-filter>
                 <action android:name="${applicationId}.voip.Receiver" />
             </intent-filter>
@@ -77,9 +88,20 @@
 
         <!--悬浮窗-->
         <service
-            android:name="com.dds.java.voip.FloatingVoipService"
+            android:name="org.java.voip.FloatingVoipService"
             android:enabled="true"
             android:exported="true" />
+
+        <service
+            android:name="org.easydarwin.easypusher.BackgroundCameraService"
+            android:enabled="true"
+            android:exported="true"/>
+
+        <service
+            android:name="org.easydarwin.easypusher.RecordService"
+            android:enabled="true"
+            android:exported="true"/>
+
     </application>
 
 </manifest>

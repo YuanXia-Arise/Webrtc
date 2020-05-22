@@ -2,14 +2,12 @@ package com.dds.skywebrtc;
 
 import android.app.Application;
 import android.content.Context;
-import android.graphics.Camera;
+import android.hardware.Camera;
 import android.media.AudioManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.dds.skywebrtc.render.ProxyVideoSink;
-import com.google.gson.Gson;
-import com.serenegiant.usb.common.UVCCameraHandler;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -60,7 +58,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
     public static final String VIDEO_CODEC_H264 = "H264";
     public static final int VIDEO_RESOLUTION_WIDTH = 1920;
     public static final int VIDEO_RESOLUTION_HEIGHT = 1080;
-    public static final int FPS = 15;
+    public static final int FPS = 30;
 
     public PeerConnectionFactory _factory;
     public MediaStream _localStream;
@@ -188,35 +186,33 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
 
     // 设置静音
     public boolean muteAudio(boolean enable) {
-//        if (_localAudioTrack != null) {
-//            _localAudioTrack.setEnabled(enable);
-//            return true;
-//        }
+        /*if (_localAudioTrack != null) {
+            _localAudioTrack.setEnabled(enable);
+            return true;
+        }*/
         if (audioDeviceModule != null) {
             audioDeviceModule.setMicrophoneMute(enable);
             return true;
         }
-
         return false;
-
     }
 
     // 设置扬声器
     public boolean toggleSpeaker(boolean enable) {
-//        if (audioManager != null) {
-//            if (enable) {
-//                audioManager.setSpeakerphoneOn(true);
-//                audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,
-//                        audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
-//                        AudioManager.STREAM_VOICE_CALL);
-//            } else {
-//                audioManager.setSpeakerphoneOn(false);
-//                audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,
-//                        audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), AudioManager.STREAM_VOICE_CALL);
-//            }
-//
-//            return true;
-//        }
+        /*if (audioManager != null) {
+            if (enable) {
+                audioManager.setSpeakerphoneOn(true);
+                audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,
+                        audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
+                        AudioManager.STREAM_VOICE_CALL);
+            } else {
+                audioManager.setSpeakerphoneOn(false);
+                audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,
+                        audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), AudioManager.STREAM_VOICE_CALL);
+            }
+
+            return true;
+        }*/
 
         if (audioDeviceModule != null) {
             audioDeviceModule.setSpeakerMute(enable);
@@ -262,7 +258,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         } else {
             Log.d(TAG, "Will not switch camera, video caputurer is not a camera");
         }
-
     }
 
     private void release() {
@@ -358,7 +353,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 if (sessionCallback.get() != null) {
                     startTime = System.currentTimeMillis();
                     sessionCallback.get().didChangeState(_callState);
-
                 }
             } else {
                 avEngineKit.mEvent.sendInvite(mRoom, mTargetId, mIsAudioOnly);
@@ -373,10 +367,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 if (sessionCallback.get() != null) {
                     sessionCallback.get().didCreateLocalVideoTrack();
                 }
-
             }
-
-
         });
     }
 
@@ -387,7 +378,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 createLocalStream();
             }
             try {
-                mPeer = new Peer(CallSession.this, userId);
+                mPeer = new Peer(CallSession.this, mTargetId);
                 mPeer.addLocalStream(_localStream);
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
@@ -402,9 +393,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
             if (sessionCallback.get() != null) {
                 startTime = System.currentTimeMillis();
                 sessionCallback.get().didChangeState(EnumType.CallState.Connected);
-
             }
-
         });
     }
 
@@ -429,7 +418,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         }
     }
 
-    // 切换到语音
     public void onDisConnect(String userId) {
 
     }
@@ -442,10 +430,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 mPeer.setRemoteDescription(sdp);
                 mPeer.createAnswer();
             }
-
-
         });
-
     }
 
     public void onReceiverAnswer(String userId, String sdp) {
@@ -456,7 +441,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 mPeer.setRemoteDescription(sessionDescription);
             }
         });
-
     }
 
     public void onRemoteIceCandidate(String userId, String id, int label, String candidate) {
@@ -464,10 +448,8 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
             if (mPeer != null) {
                 IceCandidate iceCandidate = new IceCandidate(id, label, candidate);
                 mPeer.addRemoteIceCandidate(iceCandidate);
-
             }
         });
-
     }
 
     // 对方离开房间
@@ -490,7 +472,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         SurfaceViewRenderer renderer = new SurfaceViewRenderer(mContext);
         renderer.init(mRootEglBase.getEglBaseContext(), null);
         renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
-        renderer.setMirror(true);
+        renderer.setMirror(false);
         return renderer;
     }
 
@@ -500,8 +482,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         if (_remoteStream != null && _remoteStream.videoTracks.size() > 0) {
             _remoteStream.videoTracks.get(0).addSink(sink);
         }
-
-
     }
 
     public void setupLocalVideo(SurfaceViewRenderer SurfaceViewRenderer) {
@@ -531,6 +511,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
             usbCapturer.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
             _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
             _localStream.addTrack(_localVideoTrack);*/
+
             captureAndroid = createVideoCapture();
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
@@ -539,7 +520,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
             _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
             _localStream.addTrack(_localVideoTrack);
         }
-
     }
 
     public PeerConnectionFactory createConnectionFactory() {
@@ -547,14 +527,11 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 .InitializationOptions
                 .builder(mContext)
                 .createInitializationOptions());
-
         final VideoEncoderFactory encoderFactory;
         final VideoDecoderFactory decoderFactory;
 
         encoderFactory = new DefaultVideoEncoderFactory(
-                mRootEglBase.getEglBaseContext(),
-                true,
-                true);
+                mRootEglBase.getEglBaseContext(),true,true);
         decoderFactory = new DefaultVideoDecoderFactory(mRootEglBase.getEglBaseContext());
         audioDeviceModule = JavaAudioDeviceModule.builder(mContext).createAudioDeviceModule();
         PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
@@ -583,18 +560,18 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
 
         // First, try to find front facing camera
         //for (String deviceName : deviceNames) {
-        String deviceName = "0";
+        /*String deviceName = "0"; // 设置为后置摄像头
             if (enumerator.isFrontFacing(deviceName)) {
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
 
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
-            }
+            }*/
         //}
 
         // Front facing camera not found, try something else
-        //for (String deviceName : deviceNames) {
+        for (String deviceName : deviceNames) {
             if (!enumerator.isFrontFacing(deviceName)) {
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
 
@@ -602,7 +579,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                     return videoCapturer;
                 }
             }
-        //}
+        }
         return null;
     }
 

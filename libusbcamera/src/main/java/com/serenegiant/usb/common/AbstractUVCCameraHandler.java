@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import com.TxtOverlay;
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.Size;
 import com.serenegiant.usb.USBMonitor;
@@ -34,7 +35,6 @@ import com.serenegiant.usb.encoder.biz.H264EncodeConsumer;
 import com.serenegiant.usb.encoder.biz.Mp4MediaMuxer;
 import com.serenegiant.usb.widget.CameraViewInterface;
 
-import org.easydarwin.sw.TxtOverlay;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;

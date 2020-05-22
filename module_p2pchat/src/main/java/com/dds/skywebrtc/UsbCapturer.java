@@ -5,7 +5,6 @@ import android.hardware.usb.UsbDevice;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.UVCCamera;
@@ -173,6 +172,10 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         synchronized (mSync) {
             mCamera = camera;
         }
+    }
+
+    public void setSvVideoRender(SurfaceViewRenderer svVideoRender) {
+        this.svVideoRender = svVideoRender;
     }
 
 }

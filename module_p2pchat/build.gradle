@@ -30,6 +30,7 @@ repositories {
     flatDir {
         dirs 'libs', '../libusbcamera/libs'
     }
+    mavenCentral()
 }
 
 dependencies {
