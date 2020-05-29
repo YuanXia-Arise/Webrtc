@@ -162,10 +162,9 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         }
 
         if (camera != null) {
-            /*if (svVideoRender != null) {
+            if (svVideoRender != null) {
                 camera.setPreviewDisplay(svVideoRender.getHolder().getSurface());
-            }*/
-            //camera.setFrameCallback(UsbCapturer.this, UVCCamera.PIXEL_FORMAT_YUV420SP);
+            }
             camera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_YUV420SP);
             camera.startPreview();
         }

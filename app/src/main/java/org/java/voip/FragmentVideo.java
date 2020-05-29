@@ -1,6 +1,7 @@
 package org.java.voip;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -66,6 +68,8 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     private SurfaceViewRenderer localSurfaceView;
     private SurfaceViewRenderer remoteSurfaceView;
 
+    private ImageButton DisCalling;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +82,7 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         View view = inflater.inflate(R.layout.fragment_video, container, false);
         initView(view);
         init();
-
+        //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //设置横屏
         return view;
     }
 
@@ -122,6 +126,8 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
 
         minimizeImageView.setOnClickListener(this);
 
+        DisCalling = view.findViewById(R.id.DisCalling);
+        DisCalling.setOnClickListener(this);
     }
 
     private void init() {
@@ -130,32 +136,29 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         if (session == null || EnumType.CallState.Idle == session.getState()) {
             activity.finish();
         } else if (EnumType.CallState.Connected == session.getState()) {
-            incomingActionContainer.setVisibility(View.GONE);
+            /*incomingActionContainer.setVisibility(View.GONE);
             outgoingActionContainer.setVisibility(View.GONE);
             connectedActionContainer.setVisibility(View.VISIBLE);
             inviteeInfoContainer.setVisibility(View.GONE);
-            minimizeImageView.setVisibility(View.VISIBLE);
+            minimizeImageView.setVisibility(View.VISIBLE);*/
             startRefreshTime();
         } else {
             if (isOutgoing) {
-                incomingActionContainer.setVisibility(View.GONE);
+                /*incomingActionContainer.setVisibility(View.GONE);
                 outgoingActionContainer.setVisibility(View.VISIBLE);
-                connectedActionContainer.setVisibility(View.GONE);
+                connectedActionContainer.setVisibility(View.GONE);*/
                 descTextView.setText(R.string.av_waiting);
             } else {
-                incomingActionContainer.setVisibility(View.VISIBLE);
+                /*incomingActionContainer.setVisibility(View.VISIBLE);
                 outgoingActionContainer.setVisibility(View.GONE);
-                connectedActionContainer.setVisibility(View.GONE);
+                connectedActionContainer.setVisibility(View.GONE);*/
                 descTextView.setText(R.string.av_video_invite);
             }
         }
-
         if (isFromFloatingView) {
             didCreateLocalVideoTrack();
             didReceiveRemoteVideoTrack();
         }
-
-
     }
 
     @Override
@@ -184,12 +187,12 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     public void didChangeState(EnumType.CallState state) {
         runOnUiThread(() -> {
             if (state == EnumType.CallState.Connected) {
-                incomingActionContainer.setVisibility(View.GONE);
+                /*incomingActionContainer.setVisibility(View.GONE);
                 outgoingActionContainer.setVisibility(View.GONE);
                 connectedActionContainer.setVisibility(View.VISIBLE);
-                inviteeInfoContainer.setVisibility(View.GONE);
+                inviteeInfoContainer.setVisibility(View.GONE);*/
                 descTextView.setVisibility(View.GONE);
-                minimizeImageView.setVisibility(View.VISIBLE);
+                //minimizeImageView.setVisibility(View.VISIBLE);
                 // 开启计时器
                 startRefreshTime();
             } else {
@@ -263,23 +266,33 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         if (durationTextView != null) {
             durationTextView.stop();
         }
+
+        //挂断
+        CallSession session = gEngineKit.getCurrentSession();
+        if (session != null) {
+            SkyEngineKit.Instance().endCall();
+            activity.finish();
+        } else {
+            activity.finish();
+        }
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        // 接听
+
         CallSession session = gEngineKit.getCurrentSession();
-        if (id == R.id.acceptImageView) {
+        if (id == R.id.acceptImageView) { // 接听
             if (session != null && session.getState() == EnumType.CallState.Incoming) {
                 session.joinHome();
             } else {
                 activity.finish();
             }
         }
-        // 挂断电话
-        if (id == R.id.incomingHangupImageView || id == R.id.outgoingHangupImageView ||
-                id == R.id.connectedHangupImageView) {
+
+        if (id == R.id.incomingHangupImageView ||
+                id == R.id.outgoingHangupImageView ||
+                id == R.id.connectedHangupImageView) { // 挂断
             if (session != null) {
                 SkyEngineKit.Instance().endCall();
                 activity.finish();
@@ -288,25 +301,30 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
             }
         }
 
-        // 切换摄像头
-        if (id == R.id.switchCameraImageView) {
+        if (id == R.id.switchCameraImageView) { // 切换摄像头
             if (session != null) {
                 session.switchCamera();
             }
         }
 
-        // 切换到语音拨打
         if (id == R.id.outgoingAudioOnlyImageView || id == R.id.incomingAudioOnlyImageView ||
-                id == R.id.connectedAudioOnlyImageView) {
+                id == R.id.connectedAudioOnlyImageView) { // 切换到语音拨打
             if (session != null) {
                 session.switchToAudio();
             }
-
         }
 
-        // 小窗
-        if (id == R.id.minimizeImageView) {
+        if (id == R.id.minimizeImageView) { // 小窗
             activity.showFloatingView();
+        }
+
+        if (id == R.id.DisCalling) { // 挂断
+            if (session != null) {
+                SkyEngineKit.Instance().endCall();
+                activity.finish();
+            } else {
+                activity.finish();
+            }
         }
     }
 

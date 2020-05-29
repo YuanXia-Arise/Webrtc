@@ -42,7 +42,7 @@ public class DWebSocket extends WebSocketClient {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            this.iEvent.reConnect();
+            //this.iEvent.reConnect();
         } else {
             this.iEvent.logout("onClose");
         }

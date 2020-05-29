@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.dds.skywebrtc.render.ProxyVideoSink;
+import com.serenegiant.usb.IFrameCallback;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -18,6 +19,7 @@ import org.webrtc.CameraVideoCapturer;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
+import org.webrtc.FileVideoCapturer;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
@@ -36,6 +38,7 @@ import org.webrtc.VideoTrack;
 import org.webrtc.audio.AudioDeviceModule;
 import org.webrtc.audio.JavaAudioDeviceModule;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,8 +59,8 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
     public static final String VIDEO_TRACK_ID = "ARDAMSv0";
     public static final String AUDIO_TRACK_ID = "ARDAMSa0";
     public static final String VIDEO_CODEC_H264 = "H264";
-    public static final int VIDEO_RESOLUTION_WIDTH = 1920;
-    public static final int VIDEO_RESOLUTION_HEIGHT = 1080;
+    public int VIDEO_RESOLUTION_WIDTH = 1920;
+    public int VIDEO_RESOLUTION_HEIGHT = 1080;
     public static final int FPS = 30;
 
     public PeerConnectionFactory _factory;
@@ -287,10 +290,20 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 captureAndroid = null;
             }
 
-            _localStream.dispose();
+            /*_localStream.dispose();
             _remoteStream.dispose();
-            // 关闭peer
-            mPeer.close();
+            mPeer.close();*/
+            try {
+                _localStream.dispose();
+                if (_remoteStream != null) {
+                    _remoteStream.dispose();
+                }
+                if (mPeer != null) {
+                    mPeer.close(); // 关闭peer
+                }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
 
             // 释放画布
             if (surfaceTextureHelper != null) {
@@ -360,7 +373,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
 
             // 开始显示本地画面
             if (!isAudioOnly()) {
-                // 测试视频，关闭语音以防杂音
                 if (BuildConfig.DEBUG) {
                     muteAudio(false);
                 }
@@ -497,28 +509,35 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
     public void createLocalStream() {
         _localStream = _factory.createLocalMediaStream("ARDAMS");
         // 音频
-        audioSource = _factory.createAudioSource(createAudioConstraints());
-        _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
-        _localStream.addTrack(_localAudioTrack);
+        if (PrefSingleton.getInstance().getBoolean("voice_mode")) { // 音频传输
+            audioSource = _factory.createAudioSource(createAudioConstraints());
+            _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
+            _localStream.addTrack(_localAudioTrack);
+        }
 
         // 视频
         if (!mIsAudioOnly) {
-            /*UsbCapturer usbCapturer = new UsbCapturer(mContext);
-            usbCapturer.getMonitor();
-            surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
-            videoSource = _factory.createVideoSource(usbCapturer.isScreencast());
-            usbCapturer.initialize(surfaceTextureHelper,mContext,videoSource.getCapturerObserver());
-            usbCapturer.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
-            _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-            _localStream.addTrack(_localVideoTrack);*/
+            Resolv(); //配置分辨率
 
-            captureAndroid = createVideoCapture();
-            surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
-            videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
-            captureAndroid.initialize(surfaceTextureHelper, mContext, videoSource.getCapturerObserver());
-            captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
-            _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-            _localStream.addTrack(_localVideoTrack);
+            int video_type = PrefSingleton.getInstance().getInt("video");
+            if (video_type == 1) { // 视频源1 本地摄像头
+                captureAndroid = createVideoCapture();
+                surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
+                videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
+                captureAndroid.initialize(surfaceTextureHelper, mContext, videoSource.getCapturerObserver());
+                captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
+                _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+                _localStream.addTrack(_localVideoTrack);
+            } else if (video_type == 2) { // 视频源2 USB采集卡
+                UsbCapturer usbCapturer = new UsbCapturer(mContext);
+                usbCapturer.getMonitor();
+                surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
+                videoSource = _factory.createVideoSource(usbCapturer.isScreencast());
+                usbCapturer.initialize(surfaceTextureHelper,mContext,videoSource.getCapturerObserver());
+                usbCapturer.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
+                _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+                _localStream.addTrack(_localVideoTrack);
+            }
         }
     }
 
@@ -670,6 +689,23 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         void didReceiveRemoteVideoTrack();
 
         void didError(String error);
+    }
 
+    public void Resolv() {
+        int resolv = PrefSingleton.getInstance().getInt("resolv");
+        switch (resolv) {
+            case 1:
+                VIDEO_RESOLUTION_WIDTH = 1920;
+                VIDEO_RESOLUTION_HEIGHT = 1080;
+                break;
+            case 2:
+                VIDEO_RESOLUTION_WIDTH = 680;
+                VIDEO_RESOLUTION_HEIGHT = 1080;
+                break;
+            case 3:
+                VIDEO_RESOLUTION_WIDTH = 680;
+                VIDEO_RESOLUTION_HEIGHT = 1920;
+                break;
+        }
     }
 }

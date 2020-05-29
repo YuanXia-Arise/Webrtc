@@ -1,46 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
+    android:background="@drawable/launcher_background"
     tools:context="org.LauncherActivity">
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="45dp"
+        android:background="@drawable/rectangle">
 
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="The server side is written using Spring boot" />
-
-        <Button
-            android:id="@+id/button8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="java"
-            android:text="ENTER"
-            android:textAllCaps="false" />
+        <ImageButton
+            android:id="@+id/settings"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginLeft="375dp"
+            android:background="@drawable/ic_settings"/>
     </LinearLayout>
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/text1"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="181dp"
+        android:layout_marginLeft="92dp"
+        android:text="低流量模式"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <Switch
+        android:id="@+id/button1"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="180dp"
+        android:layout_marginLeft="245dp"
+        android:checked="true"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/button_on"
+        android:switchTextAppearance="@style/SwitchTextColorTheme"/>
+    <TextView
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="180dp"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@id/button1"
+        android:text="开"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text1"
+        android:layout_marginTop="27dp"
+        android:layout_marginLeft="92dp"
+        android:text="键盘"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <Switch
+        android:id="@+id/button2"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="227dp"
+        android:layout_marginLeft="245dp"
+        android:checked="false"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/button_on"
+        android:switchTextAppearance="@style/SwitchTextColorTheme"/>
+    <TextView
+        android:id="@+id/switch2"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="227dp"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@id/button2"
+        android:text="关"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:id="@+id/text3"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text2"
+        android:layout_marginTop="27dp"
+        android:layout_marginLeft="92dp"
+        android:text="声音"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <Switch
+        android:id="@+id/button3"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="277dp"
+        android:layout_marginLeft="245dp"
+        android:checked="true"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/button_on"
+        android:switchTextAppearance="@style/SwitchTextColorTheme" />
+    <TextView
+        android:id="@+id/switch3"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="277dp"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@id/button3"
+        android:text="开"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:id="@+id/text4"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text3"
+        android:layout_marginTop="27dp"
+        android:layout_marginLeft="92dp"
+        android:text="视频源选择"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"/>
+
+    <ImageView
+        android:id="@+id/image1"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="326dp"
+        android:layout_marginLeft="235dp"
+        android:background="@drawable/ic_switch"/>
+
+    <ImageView
+        android:id="@+id/image2"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="354dp"
+        android:layout_marginLeft="235dp"
+        android:background="@drawable/ic_switch"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="321dp"
+        android:layout_marginLeft="259dp"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/video_one"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:checked="true"
+            android:padding="3dp"
+            android:text="视频源1"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <RadioButton
+            android:id="@+id/video_two"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:text="视频源2"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:button="@null"/>
+    </RadioGroup>
+
+    <ImageView
+        android:layout_width="85dp"
+        android:layout_height="84dp"
+        android:layout_marginLeft="167dp"
+        android:layout_marginTop="144dp"
+        android:layout_below="@+id/text4"
+        android:src="@drawable/ic_calls"/>
+
+    <ImageButton
+        android:id="@+id/Calling"
+        android:layout_width="72dp"
+        android:layout_height="71dp"
+        android:layout_marginLeft="174dp"
+        android:layout_marginTop="151dp"
+        android:layout_below="@+id/text4"
+        android:background="@drawable/ic_calling"/>
+    <TextView
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="189dp"
+        android:layout_below="@+id/Calling"
+        android:text="拨号"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"/>
+
+</RelativeLayout>

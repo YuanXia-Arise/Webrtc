@@ -40,13 +40,6 @@ public class SettingActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*ActivitySettingBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_setting);
-        setSupportActionBar(binding.mainToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        binding.mainToolbar.setOnMenuItemClickListener(this);
-        // 左边的小箭头（注意需要在setSupportActionBar(toolbar)之后才有效果）
-        binding.mainToolbar.setNavigationIcon(R.drawable.com_back);*/
-
         setContentView(R.layout.activity_setting);
         ActionBar bar = getSupportActionBar();
         bar.setTitle("设置");
@@ -55,8 +48,8 @@ public class SettingActivity extends AppCompatActivity{
             bar.setDisplayHomeAsUpEnabled(true);
         }
 
-        url = (EditText) findViewById(R.id.push_url);
-        url.setText(Config.getServerURL(this));
+        //url = (EditText) findViewById(R.id.push_url);
+        //url.setText(Config.getServerURL(this));
 
         /*wss = findViewById(R.id.wss_url);
         user_id = findViewById(R.id.user_id);

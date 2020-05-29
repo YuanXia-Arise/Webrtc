@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +25,7 @@ import com.dds.skywebrtc.permission.Permissions;
 
 
 import org.easydarwin.easypusher.R;
+import org.java.socket.SocketManager;
 
 import java.util.UUID;
 
@@ -248,5 +250,6 @@ public class CallSingleActivity extends AppCompatActivity implements CallSession
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        SocketManager.getInstance().unConnect();
     }
 }

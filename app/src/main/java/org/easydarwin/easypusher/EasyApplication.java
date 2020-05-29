@@ -1,10 +1,15 @@
 package org.easydarwin.easypusher;
 
+import android.Manifest;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Build;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import org.App;
 import org.easydarwin.bus.StartRecord;
@@ -14,6 +19,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.squareup.otto.ThreadEnforcer;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.zhy.autolayout.config.AutoLayoutConifg;
 
 import java.io.File;
 import java.io.FileOutputStream;

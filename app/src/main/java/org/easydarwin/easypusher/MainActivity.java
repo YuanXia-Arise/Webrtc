@@ -155,10 +155,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         BUS.register(this);
         //notifyAboutColorChange();
-        // 动态获取camera和audio权限
+        // 动态获取权限
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, REQUEST_CAMERA_PERMISSION);
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
             mNeedGrantedPermission = true;
             return;
         } else {
@@ -353,7 +355,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             textRecordTick.setVisibility(View.INVISIBLE);
             textRecordTick.removeCallbacks(mRecordTickRunnable);
         }
-
     }
 
     /*
@@ -477,9 +478,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 textRecordTick.setVisibility(View.INVISIBLE);
                 textRecordTick.removeCallbacks(mRecordTickRunnable);
-
-                /*ImageView ib = findViewById(R.id.streaming_activity_record);
-                ib.setImageResource(R.drawable.record);*/
             }
         });
     }

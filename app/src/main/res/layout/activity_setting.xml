@@ -1,125 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SettingActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/launcher_background"
+    tools:context="org.SetupActivity">
 
-    <LinearLayout
-        android:id="@+id/rtsp"
+    <RelativeLayout
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/setting_url_shape"
-        android:padding="5dp"
-        android:orientation="horizontal">
+        android:layout_height="44dp"
+        android:layout_alignParentTop="true">
+
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_marginTop="11dp"
+            android:layout_marginLeft="16sp"
+            android:background="@drawable/ic_back"/>
 
         <TextView
-            android:id="@+id/rtsp_url"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="推流地址："/>
+            android:layout_width="36sp"
+            android:layout_height="25dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginLeft="193dp"
+            android:text="设置"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"/>
 
-        <EditText
-            android:id="@+id/push_url"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:textColor="#4c4c4c"
-            android:layout_gravity="center_vertical"
-            android:background="@null"
-            android:text=""
-            android:layout_toRightOf="@+id/rtsp_url"/>
-    </LinearLayout>
+    </RelativeLayout>
 
-    <!--<LinearLayout
-        android:id="@+id/wss"
+    <TextView
+        android:id="@+id/line"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/setting_url_shape"
-        android:padding="5dp"
-        android:orientation="horizontal"
-        android:layout_below="@+id/rtsp">
+        android:layout_height="1dp"
+        android:background="#FFFFFF"
+        android:layout_below="@+id/top_bar" />
 
-        <TextView
-            android:id="@+id/wss_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="wss地址："/>
-
-        <EditText
-            android:id="@+id/wss_url"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:textColor="#4c4c4c"
-            android:layout_gravity="center_vertical"
-            android:background="@null"
-            android:text=""
-            android:layout_toRightOf="@+id/user"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/User"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/setting_url_shape"
-        android:padding="5dp"
-        android:orientation="horizontal"
-        android:layout_below="@+id/wss">
+        android:layout_height="match_parent"
+        android:background="@drawable/rectangle"
+        android:layout_below="@+id/line">
 
+        <ImageView
+            android:layout_width="19dp"
+            android:layout_height="16sp"
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="31dp"
+            android:background="@drawable/ic_resolv"/>
         <TextView
-            android:id="@+id/user"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="用户名："/>
+            android:layout_height="22dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginLeft="55dp"
+            android:text="分辨率"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/resolv_one"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginTop="55dp"
+            android:layout_marginLeft="46dp"
+            android:background="@drawable/button_off"
+            android:text="1080x1920"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/resolv_two"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="55dp"
+            android:layout_marginLeft="165dp"
+            android:background="@drawable/button_off"
+            android:text="1080x680"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/resolv_thr"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="55dp"
+            android:layout_marginLeft="280dp"
+            android:background="@drawable/button_off"
+            android:text="1920x680"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+
+        <ImageView
+            android:layout_width="19dp"
+            android:layout_height="19dp"
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="138dp"
+            android:background="@drawable/ic_url"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="22dp"
+            android:layout_marginTop="136dp"
+            android:layout_marginLeft="55dp"
+            android:text="服务器地址"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
 
         <EditText
-            android:id="@+id/user_id"
-            android:layout_width="0dp"
+            android:id="@+id/url"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:layout_width="320dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:textColor="#4c4c4c"
-            android:layout_gravity="center_vertical"
-            android:background="@null"
-            android:text=""
-            android:layout_toRightOf="@+id/user"/>
-    </LinearLayout>
+            android:layout_marginTop="172dp"
+            android:layout_marginLeft="55dp"
+            android:theme="@style/MyEditText"
+            android:hint="请输入服务器地址"
+            android:textColorHint="#FFFFFF"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/setting_url_shape"
-        android:padding="5dp"
-        android:orientation="horizontal"
-        android:layout_below="@+id/User">
 
+        <ImageView
+            android:layout_width="19dp"
+            android:layout_height="16sp"
+            android:layout_marginLeft="28dp"
+            android:layout_marginTop="246dp"
+            android:background="@drawable/ic_key"/>
         <TextView
-            android:id="@+id/target"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="回应名："/>
+            android:layout_height="22dp"
+            android:layout_marginTop="243dp"
+            android:layout_marginLeft="55dp"
+            android:text="键盘方案"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
 
-        <EditText
-            android:id="@+id/target_id"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:textColor="#4c4c4c"
-            android:layout_gravity="center_vertical"
-            android:background="@null"
-            android:text=""
-            android:layout_toRightOf="@+id/user"/>
-    </LinearLayout>-->
+        <Button
+            android:id="@+id/program_one"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="273dp"
+            android:layout_marginLeft="42dp"
+            android:background="@drawable/button_off"
+            android:text="方案1"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF" />
+        <Button
+            android:id="@+id/program_two"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="273dp"
+            android:layout_marginLeft="165dp"
+            android:background="@drawable/button_off"
+            android:text="方案2"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+        <Button
+            android:id="@+id/program_thr"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="273dp"
+            android:layout_marginLeft="280dp"
+            android:background="@drawable/button_off"
+            android:text="方案3"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+        <Button
+            android:id="@+id/program_fou"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="330dp"
+            android:layout_marginLeft="42dp"
+            android:background="@drawable/button_off"
+            android:text="方案4"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF" />
+        <Button
+            android:id="@+id/program_fiv"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="330dp"
+            android:layout_marginLeft="165dp"
+            android:background="@drawable/button_off"
+            android:text="方案5"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+        <Button
+            android:id="@+id/program_six"
+            android:layout_width="95dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="330dp"
+            android:layout_marginLeft="280dp"
+            android:background="@drawable/button_off"
+            android:text="方案6"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/enter"
+            android:layout_width="267dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="402dp"
+            android:layout_marginLeft="77dp"
+            android:background="@drawable/button_on"
+            android:text="确定"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+
+    </RelativeLayout>
 
 
 </RelativeLayout>
