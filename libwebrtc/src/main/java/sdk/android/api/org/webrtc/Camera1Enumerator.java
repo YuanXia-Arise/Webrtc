@@ -10,7 +10,11 @@
 
 package org.webrtc;
 
+import android.hardware.Camera;
 import android.os.SystemClock;
+import android.util.Log;
+
+import com.google.gson.Gson;
 
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat;
 

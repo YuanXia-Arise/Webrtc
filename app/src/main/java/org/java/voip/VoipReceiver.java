@@ -7,7 +7,6 @@ import android.content.Intent;
 import com.dds.skywebrtc.SkyEngineKit;
 
 import org.App;
-import org.easydarwin.easypusher.EasyApplication;
 
 /**
  * Created by dds on 2019/8/25.
@@ -26,7 +25,7 @@ public class VoipReceiver extends BroadcastReceiver {
             String[] list = userList.split(",");
             SkyEngineKit.init(new VoipEvent());
             //boolean b = SkyEngineKit.Instance().startInCall(App.getInstance(), room, inviteId, audioOnly);
-            boolean b = SkyEngineKit.Instance().startInCall(EasyApplication.getEasyApplication(), room, inviteId, audioOnly);
+            boolean b = SkyEngineKit.Instance().startInCall(App.getApp(), room, inviteId, audioOnly);
             if (b) {
                 if (list.length == 1) {
                     CallSingleActivity.openActivity(context, inviteId, false, audioOnly);

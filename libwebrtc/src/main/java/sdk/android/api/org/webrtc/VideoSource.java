@@ -11,6 +11,11 @@
 package org.webrtc;
 
 
+import android.util.Log;
+
+import com.google.gson.Gson;
+
+import static org.webrtc.VideoFrameDrawer.TAG;
 
 /**
  * Java wrapper of native AndroidVideoTrackSource.

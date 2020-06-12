@@ -42,7 +42,6 @@ public class SkyEngineKit {
                     .createIceServer();
             avEngineKit.iceServers.add(var1);
 
-
             PeerConnection.IceServer var11 = PeerConnection.IceServer.builder("stun:47.93.186.97:3478?transport=udp")
                     .createIceServer();
             PeerConnection.IceServer var12 = PeerConnection.IceServer.builder("turn:47.93.186.97:3478?transport=udp")

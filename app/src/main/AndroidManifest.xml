@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.easydarwin.easypusher">
+    package="com.webrtc">
 
     <!-- 设置视频直播权限 -->
     <uses-feature android:name="android.hardware.camera" />
@@ -30,15 +30,18 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
+    <!--android:vmSafeMode="true" 虚拟机运行在安全模式下
+        android:allowClearUserData="true" 应用重置用户数据 false
+        android:hardwareAccelerated="true" Activity和View进行硬件加速渲染-->
+
     <application
-        android:name="org.easydarwin.easypusher.EasyApplication"
+        android:name="org.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="org.java.voip.CallMultiActivity" />
 
         <activity
             android:name="org.LauncherActivity"
@@ -54,11 +57,11 @@
             </intent-filter>
 
             <!--USB-->
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
             <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
+                android:resource="@xml/device_filter" />-->
             <!--USB END-->
         </activity>
 
@@ -67,28 +70,22 @@
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"/>
 
-        <activity android:name="org.easydarwin.easypusher.MainActivity" />
-
-        <activity android:name="org.java.JavaActivity" />
-
         <!-- ======================java====================== -->
         <activity
             android:name="org.java.voip.CallSingleActivity"
+            android:vmSafeMode="true"
+            android:hardwareAccelerated="true"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
             android:theme="@style/AppTheme.NoActionBar"
-            tools:ignore="UnusedAttribute">
+            >
             <intent-filter>
                 <action android:name="${applicationId}.kit.voip.single" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="org.easydarwin.easypusher.SettingActivity"
-            android:screenOrientation="portrait" />
 
         <receiver android:name="org.java.voip.VoipReceiver">
             <intent-filter>
@@ -101,16 +98,6 @@
             android:name="org.java.voip.FloatingVoipService"
             android:enabled="true"
             android:exported="true" />
-
-        <service
-            android:name="org.easydarwin.easypusher.BackgroundCameraService"
-            android:enabled="true"
-            android:exported="true"/>
-
-        <service
-            android:name="org.easydarwin.easypusher.RecordService"
-            android:enabled="true"
-            android:exported="true"/>
 
     </application>
 

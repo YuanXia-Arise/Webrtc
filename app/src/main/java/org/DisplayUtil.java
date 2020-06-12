@@ -3,7 +3,6 @@ package org;
 import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentCallbacks;
-import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 

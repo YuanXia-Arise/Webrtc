@@ -38,7 +38,7 @@
         android:layout_height="25dp"
         android:layout_marginTop="180dp"
         android:layout_marginLeft="245dp"
-        android:checked="true"
+        android:checked="false"
         android:thumb="@drawable/ic_switch"
         android:track="@drawable/button_on"
         android:switchTextAppearance="@style/SwitchTextColorTheme"/>
@@ -49,7 +49,7 @@
         android:layout_marginTop="180dp"
         android:layout_marginLeft="4dp"
         android:layout_toRightOf="@id/button1"
-        android:text="开"
+        android:text="关"
         android:textSize="16sp"
         android:textColor="#FFFFFF"/>
 
@@ -102,7 +102,7 @@
         android:layout_height="25dp"
         android:layout_marginTop="277dp"
         android:layout_marginLeft="245dp"
-        android:checked="true"
+        android:checked="false"
         android:thumb="@drawable/ic_switch"
         android:track="@drawable/button_on"
         android:switchTextAppearance="@style/SwitchTextColorTheme" />
@@ -113,7 +113,7 @@
         android:layout_marginTop="277dp"
         android:layout_marginLeft="4dp"
         android:layout_toRightOf="@id/button3"
-        android:text="开"
+        android:text="关"
         android:textSize="16sp"
         android:textColor="#FFFFFF"/>
 

@@ -4,10 +4,14 @@ import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.UVCCamera;
+import com.serenegiant.usb.common.AbstractUVCCameraHandler;
+import com.serenegiant.usb.common.UVCCameraHandler;
+import com.serenegiant.usb.widget.CameraViewInterface;
 
 import org.webrtc.CapturerObserver;
 import org.webrtc.NV21Buffer;
@@ -20,7 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectListener {
+public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectListener, IFrameCallback {
     private static final String TAG = "UsbCapturer";
     private USBMonitor monitor;
     private SurfaceViewRenderer svVideoRender;
@@ -37,6 +41,7 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         //this.svVideoRender = svVideoRender;
         monitor = new USBMonitor(context, this);
     }
+
 
     @Override
     public void initialize(SurfaceTextureHelper surfaceTextureHelper, Context context, CapturerObserver capturerObserver) {
@@ -115,9 +120,10 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
 
     private ReentrantLock imageArrayLock = new ReentrantLock();
 
-    private final IFrameCallback mIFrameCallback = new IFrameCallback() {
+    //private final IFrameCallback mIFrameCallback = new IFrameCallback() {
     @Override
     public void onFrame(final ByteBuffer frame) {
+        Log.d(TAG, "startPreview:8");
         if (frame != null) {
             imageArrayLock.lock();
 
@@ -125,20 +131,22 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
             frame.get(imageArray);
             //关键
             long imageTime = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
-            VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, null);
+            VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, UVCCamera.DEFAULT_PREVIEW_WIDTH,
+                    UVCCamera.DEFAULT_PREVIEW_HEIGHT,null);
             VideoFrame mVideoFrame = new VideoFrame(mNV21Buffer, 0, imageTime);
             capturerObserver.onFrameCaptured(mVideoFrame);
 
             mVideoFrame.release();
             imageArrayLock.unlock();
         }
-    }};
+    }//};
 
     public USBMonitor getMonitor() {
         return this.monitor;
     }
 
     private void startPreview() {
+        Log.d(TAG, "startPreview:");
         synchronized (mSync) {
             if (mCamera != null) {
                 mCamera.destroy();
@@ -149,8 +157,18 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         camera.setAutoWhiteBlance(true);
         try {
             camera.open(ctrlBlock);
+            synchronized (mSync) {
+                mCamera = camera;
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            //camera.open(ctrlBlock);
             //camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, UVCCamera.PIXEL_FORMAT_RAW);
             camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 1, mFps, UVCCamera.PIXEL_FORMAT_RAW, 1.0f);
+
         } catch (Exception e) {
             try {
                 //camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, UVCCamera.DEFAULT_PREVIEW_MODE);
@@ -162,19 +180,19 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         }
 
         if (camera != null) {
-            if (svVideoRender != null) {
+            /*if (svVideoRender != null) {
                 camera.setPreviewDisplay(svVideoRender.getHolder().getSurface());
-            }
-            camera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_YUV420SP);
+            }*/
+            camera.setFrameCallback(UsbCapturer.this, UVCCamera.PIXEL_FORMAT_YUV420SP);
+            //mCamera.setFrameCallback(mIFrameCallback, UVCCamera.PIXEL_FORMAT_YUV420SP);
             camera.startPreview();
         }
-        synchronized (mSync) {
+        /*synchronized (mSync) {
             mCamera = camera;
-        }
+        }*/
     }
 
     public void setSvVideoRender(SurfaceViewRenderer svVideoRender) {
         this.svVideoRender = svVideoRender;
     }
-
 }

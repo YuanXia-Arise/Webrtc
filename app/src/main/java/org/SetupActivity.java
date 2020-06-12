@@ -16,9 +16,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.dds.skywebrtc.PrefSingleton;
-
-import org.easydarwin.easypusher.R;
+import com.webrtc.R;
+import org.webrtc.PrefSingleton;
 
 /**
  * 设置页
@@ -27,7 +26,7 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
 
     private ImageButton Back;
     private EditText editText;
-    private Button resolv_one,resolv_two,resolv_thr;
+    private Button resolv_one,resolv_two,resolv_thr,resolv_fou,resolv_fiv,resolv_six;
     private Button program_one,program_two,program_thr,program_fou,program_fiv,program_six;
     private Button Enter;
     @Override
@@ -57,19 +56,55 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
                 resolv_one.setBackground(getResources().getDrawable(R.drawable.button_on));
                 resolv_two.setBackground(getResources().getDrawable(R.drawable.button_off));
                 resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_off));
                 Resolv = 1;
                 break;
             case R.id.resolv_two:
                 resolv_one.setBackground(getResources().getDrawable(R.drawable.button_off));
                 resolv_two.setBackground(getResources().getDrawable(R.drawable.button_on));
                 resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_off));
                 Resolv = 2;
                 break;
             case R.id.resolv_thr:
                 resolv_one.setBackground(getResources().getDrawable(R.drawable.button_off));
                 resolv_two.setBackground(getResources().getDrawable(R.drawable.button_off));
                 resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_on));
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_off));
                 Resolv = 3;
+                break;
+            case R.id.resolv_fou:
+                resolv_one.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_two.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_on));
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_off));
+                Resolv = 4;
+                break;
+            case R.id.resolv_fiv:
+                resolv_one.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_two.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_on));
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_off));
+                Resolv = 5;
+                break;
+            case R.id.resolv_six:
+                resolv_one.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_two.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_off));
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_on));
+                Resolv = 6;
                 break;
 
             case R.id.program_one:
@@ -142,6 +177,12 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         resolv_two.setOnClickListener(this);
         resolv_thr = findViewById(R.id.resolv_thr);
         resolv_thr.setOnClickListener(this);
+        resolv_fou = findViewById(R.id.resolv_fou);
+        resolv_fou.setOnClickListener(this);
+        resolv_fiv = findViewById(R.id.resolv_fiv);
+        resolv_fiv.setOnClickListener(this);
+        resolv_six = findViewById(R.id.resolv_six);
+        resolv_six.setOnClickListener(this);
         int resolv = PrefSingleton.getInstance().getInt("resolv");
         switch(resolv){
             case 1:
@@ -152,6 +193,15 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case 3:
                 resolv_thr.setBackground(getResources().getDrawable(R.drawable.button_on));
+                break;
+            case 4:
+                resolv_fou.setBackground(getResources().getDrawable(R.drawable.button_on));
+                break;
+            case 5:
+                resolv_fiv.setBackground(getResources().getDrawable(R.drawable.button_on));
+                break;
+            case 6:
+                resolv_six.setBackground(getResources().getDrawable(R.drawable.button_on));
                 break;
         }
     }
@@ -169,15 +219,6 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         program_fiv.setOnClickListener(this);
         program_six = findViewById(R.id.program_six);
         program_six.setOnClickListener(this);
-        if (!PrefSingleton.getInstance().getBoolean("key_mode")) {
-            program_one.setEnabled(false);
-            program_two.setEnabled(false);
-            program_thr.setEnabled(false);
-            program_fou.setEnabled(false);
-            program_fiv.setEnabled(false);
-            program_six.setEnabled(false);
-            PrefSingleton.getInstance().remove("program");
-        }
         int program = PrefSingleton.getInstance().getInt("program");
         switch(program){
             case 1:
@@ -207,10 +248,16 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         }
         if (Resolv == 1) {
             PrefSingleton.getInstance().putInt("resolv",1);
-        } else if (Resolv == 2) {
+        } else if (Resolv == 2){
             PrefSingleton.getInstance().putInt("resolv",2);
-        } else {
+        } else if (Resolv == 3){
             PrefSingleton.getInstance().putInt("resolv",3);
+        } else if (Resolv == 4){
+            PrefSingleton.getInstance().putInt("resolv",4);
+        } else if (Resolv == 5){
+            PrefSingleton.getInstance().putInt("resolv",5);
+        } else {
+            PrefSingleton.getInstance().putInt("resolv",6);
         }
 
         if (Program == 0) {

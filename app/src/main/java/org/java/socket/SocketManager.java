@@ -10,7 +10,6 @@ import org.App;
 import com.dds.skywebrtc.CallSession;
 import com.dds.skywebrtc.SkyEngineKit;
 
-import org.easydarwin.easypusher.EasyApplication;
 import org.java.voip.Utils;
 import org.java.voip.VoipReceiver;
 
@@ -197,10 +196,10 @@ public class SocketManager implements IEvent {
         intent.putExtra("userList", userList);
         intent.setAction(Utils.ACTION_VOIP_RECEIVER);
         //intent.setComponent(new ComponentName(App.getInstance().getPackageName(), VoipReceiver.class.getName()));
-        intent.setComponent(new ComponentName(EasyApplication.getEasyApplication().getPackageName(), VoipReceiver.class.getName()));
+        intent.setComponent(new ComponentName(App.getApp().getPackageName(), VoipReceiver.class.getName()));
         // 发送广播
         //App.getInstance().sendBroadcast(intent);
-        EasyApplication.getEasyApplication().sendBroadcast(intent);
+        App.getApp().sendBroadcast(intent);
 
     }
 

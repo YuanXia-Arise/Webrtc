@@ -2,14 +2,21 @@ package com.dds.skywebrtc;
 
 import android.app.Application;
 import android.content.Context;
-import android.hardware.Camera;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
+import com.dds.libusbcamera.UVCCameraHelper;
 import com.dds.skywebrtc.render.ProxyVideoSink;
-import com.serenegiant.usb.IFrameCallback;
+import com.serenegiant.usb.UVCCamera;
+import com.serenegiant.usb.common.AbstractUVCCameraHandler;
+import com.serenegiant.usb.widget.CameraViewInterface;
 
+import org.json.JSONObject;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
@@ -19,13 +26,14 @@ import org.webrtc.CameraVideoCapturer;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
-import org.webrtc.FileVideoCapturer;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
+import org.webrtc.NV21Buffer;
 import org.webrtc.NetworkMonitor;
 import org.webrtc.NetworkMonitorAutoDetect;
 import org.webrtc.PeerConnectionFactory;
+import org.webrtc.PrefSingleton;
 import org.webrtc.RendererCommon;
 import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
@@ -33,6 +41,7 @@ import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoDecoderFactory;
 import org.webrtc.VideoEncoderFactory;
+import org.webrtc.VideoFrame;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 import org.webrtc.audio.AudioDeviceModule;
@@ -40,11 +49,14 @@ import org.webrtc.audio.JavaAudioDeviceModule;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by dds on 2019/8/19.
@@ -88,6 +100,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
     private AudioDeviceModule audioDeviceModule;
     private boolean isSwitch = false; // 是否正在切换摄像头
 
+    private SurfaceViewRenderer localRenderer;
 
     public CallSession(SkyEngineKit avEngineKit, Context context, boolean audioOnly) {
         this.avEngineKit = avEngineKit;
@@ -294,7 +307,10 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
             _remoteStream.dispose();
             mPeer.close();*/
             try {
-                _localStream.dispose();
+                if (_localStream != null) {
+                    _localStream.dispose();
+                }
+                //_localStream.dispose();
                 if (_remoteStream != null) {
                     _remoteStream.dispose();
                 }
@@ -302,7 +318,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                     mPeer.close(); // 关闭peer
                 }
             } catch (IllegalStateException e) {
-                e.printStackTrace();
+
             }
 
             // 释放画布
@@ -480,6 +496,7 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         return startTime;
     }
 
+
     public SurfaceViewRenderer createRendererView() {
         SurfaceViewRenderer renderer = new SurfaceViewRenderer(mContext);
         renderer.init(mRootEglBase.getEglBaseContext(), null);
@@ -509,15 +526,18 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
     public void createLocalStream() {
         _localStream = _factory.createLocalMediaStream("ARDAMS");
         // 音频
-        if (PrefSingleton.getInstance().getBoolean("voice_mode")) { // 音频传输
-            audioSource = _factory.createAudioSource(createAudioConstraints());
-            _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
-            _localStream.addTrack(_localAudioTrack);
+        audioSource = _factory.createAudioSource(createAudioConstraints());
+        _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
+        if (PrefSingleton.getInstance().getBoolean("voice_mode")) {
+            _localAudioTrack.setEnabled(true);
+        } else {
+            _localAudioTrack.setEnabled(false);
         }
+            _localStream.addTrack(_localAudioTrack);
 
         // 视频
         if (!mIsAudioOnly) {
-            Resolv(); //配置分辨率
+            Resolv(); // 分辨率信息
 
             int video_type = PrefSingleton.getInstance().getInt("video");
             if (video_type == 1) { // 视频源1 本地摄像头
@@ -529,17 +549,67 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
                 _localStream.addTrack(_localVideoTrack);
             } else if (video_type == 2) { // 视频源2 USB采集卡
-                UsbCapturer usbCapturer = new UsbCapturer(mContext);
+                //UsbCapturer usbCapturer = new UsbCapturer(mContext,localRenderer);
+                /*UsbCapturer usbCapturer = new UsbCapturer(mContext);
                 usbCapturer.getMonitor();
                 surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
                 videoSource = _factory.createVideoSource(usbCapturer.isScreencast());
                 usbCapturer.initialize(surfaceTextureHelper,mContext,videoSource.getCapturerObserver());
                 usbCapturer.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
                 _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-                _localStream.addTrack(_localVideoTrack);
+                _localStream.addTrack(_localVideoTrack);*/
+
+                try {
+                    Thread.sleep(200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                videoSource = _factory.createVideoSource(true);
+                new Thread_USB().start();
             }
         }
     }
+
+    private boolean Usb_Camera = true;
+    private int width_usb = 1920;
+    private int height_usb = 1080;
+    private ReentrantLock imageArrayLock = new ReentrantLock();
+
+    public class Thread_USB extends Thread {
+        @Override
+        public void run() {
+            while (Usb_Camera){
+                try {
+                    Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
+                    Thread.sleep(100);
+                    byte[] bytes = new Util().readFileToByteArray();
+                    ByteBuffer frame = ByteBuffer.wrap(bytes);
+                    if (frame != null) {
+                        Log.d(TAG, "123==1");
+                        imageArrayLock.lock();
+                        byte[] imageArray = new byte[frame.capacity()];
+                        //byte[] imageArray = new byte[frame.remaining()];
+                        frame.get(imageArray);
+                        long imageTime = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
+                        VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, width_usb, height_usb, null);
+                        VideoFrame videoFrame = new VideoFrame(mNV21Buffer, 90, imageTime);
+                        videoSource.getCapturerObserver().onFrameCaptured(videoFrame);
+                        videoFrame.release();
+                        imageArrayLock.unlock();
+                        _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+                        _localStream.addTrack(_localVideoTrack);
+                    }
+                } catch (NullPointerException e) {
+
+                } catch (InterruptedException e) {
+
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
 
     public PeerConnectionFactory createConnectionFactory() {
         PeerConnectionFactory.initialize(PeerConnectionFactory
@@ -578,22 +648,19 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         final String[] deviceNames = enumerator.getDeviceNames();
 
         // First, try to find front facing camera
-        //for (String deviceName : deviceNames) {
-        /*String deviceName = "0"; // 设置为后置摄像头
+        /*for (String deviceName : deviceNames) {
             if (enumerator.isFrontFacing(deviceName)) {
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
-
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
-            }*/
-        //}
+            }
+        }*/
 
         // Front facing camera not found, try something else
         for (String deviceName : deviceNames) {
             if (!enumerator.isFrontFacing(deviceName)) {
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
-
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
@@ -697,15 +764,85 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
             case 1:
                 VIDEO_RESOLUTION_WIDTH = 1920;
                 VIDEO_RESOLUTION_HEIGHT = 1080;
+                width_usb = 1920;
+                height_usb = 1080;
                 break;
             case 2:
                 VIDEO_RESOLUTION_WIDTH = 680;
                 VIDEO_RESOLUTION_HEIGHT = 1080;
+                width_usb = 1920;
+                height_usb = 1080;
                 break;
             case 3:
                 VIDEO_RESOLUTION_WIDTH = 680;
                 VIDEO_RESOLUTION_HEIGHT = 1920;
+                width_usb = 1920;
+                height_usb = 1080;
+                break;
+            case 4:
+                VIDEO_RESOLUTION_WIDTH = 640;
+                VIDEO_RESOLUTION_HEIGHT = 480;
+                width_usb = 640;
+                height_usb = 480;
+                break;
+            case 5:
+                VIDEO_RESOLUTION_WIDTH = 800;
+                VIDEO_RESOLUTION_HEIGHT = 600;
+                width_usb = 800;
+                height_usb = 600;
+                break;
+            case 6:
+                VIDEO_RESOLUTION_WIDTH = 1280;
+                VIDEO_RESOLUTION_HEIGHT = 960;
+                width_usb = 1280;
+                height_usb = 960;
                 break;
         }
+    }
+
+    public void USBCamera_work() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (Usb_Camera){
+                    try {
+                        Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
+                        byte[] bytes = new Util().readFileToByteArray();
+                        ByteBuffer frame = ByteBuffer.wrap(bytes);
+                        if (frame != null) {
+                            Log.d(TAG, "123==1");
+                            imageArrayLock.lock();
+                            byte[] imageArray = new byte[frame.remaining()];
+                            frame.get(imageArray);
+                            long imageTime = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
+                            VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, VIDEO_RESOLUTION_WIDTH,
+                                    VIDEO_RESOLUTION_HEIGHT,null);
+                            VideoFrame mVideoFrame = new VideoFrame(mNV21Buffer, 90, imageTime);
+                            videoSource.getCapturerObserver().onFrameCaptured(mVideoFrame);
+                            mVideoFrame.release();
+                            imageArrayLock.unlock();
+                            _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+                            _localStream.addTrack(_localVideoTrack);
+                            /*imageArrayLock.lock();
+                            byte[] imageArray = new byte[frame.remaining()];
+                            frame.get(imageArray);
+                            frame.rewind();
+                            NV21Buffer nv21Buffer = new NV21Buffer(imageArray,VIDEO_RESOLUTION_WIDTH,VIDEO_RESOLUTION_HEIGHT, null);
+                            VideoFrame videoFrame = new VideoFrame(nv21Buffer, 90, System.nanoTime());
+                            videoSource.getCapturerObserver().onFrameCaptured(videoFrame);
+                            videoFrame.release();
+                            imageArrayLock.unlock();
+                            _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+                            _localStream.addTrack(_localVideoTrack);*/
+
+                        }
+                    } catch (NullPointerException e) {
+
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }).start();
     }
 }

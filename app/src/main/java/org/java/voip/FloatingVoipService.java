@@ -28,7 +28,7 @@ import com.dds.skywebrtc.CallSession;
 import com.dds.skywebrtc.EnumType;
 import com.dds.skywebrtc.SkyEngineKit;
 
-import org.easydarwin.easypusher.R;
+import com.webrtc.R;
 import org.webrtc.BuildConfig;
 
 import org.webrtc.SurfaceViewRenderer;

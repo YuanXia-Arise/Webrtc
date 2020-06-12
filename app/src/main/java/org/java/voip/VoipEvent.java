@@ -5,8 +5,8 @@ import android.net.Uri;
 
 import com.dds.skywebrtc.inter.ISkyEvent;
 
-import org.easydarwin.easypusher.EasyApplication;
-import org.easydarwin.easypusher.R;
+import org.App;
+import com.webrtc.R;
 import org.java.socket.SocketManager;
 
 /**
@@ -95,13 +95,13 @@ public class VoipEvent implements ISkyEvent {
         if (isComing) {
             //Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.incoming_call_ring);
             //ringPlayer.play(App.getInstance(), uri, true, AudioManager.STREAM_RING);
-            Uri uri = Uri.parse("android.resource://" + EasyApplication.getEasyApplication().getPackageName() + "/" + R.raw.incoming_call_ring);
-            ringPlayer.play(EasyApplication.getEasyApplication(), uri, true, AudioManager.STREAM_RING);
+            Uri uri = Uri.parse("android.resource://" + App.getApp().getPackageName() + "/" + R.raw.incoming_call_ring);
+            ringPlayer.play(App.getApp(), uri, true, AudioManager.STREAM_RING);
         } else {
             //Uri uri = Uri.parse("android.resource://" + App.getInstance().getPackageName() + "/" + R.raw.wr_ringback);
             //ringPlayer.play(App.getInstance(), uri, true, AudioManager.STREAM_RING);
-            Uri uri = Uri.parse("android.resource://" + EasyApplication.getEasyApplication().getPackageName() + "/" + R.raw.incoming_call_ring);
-            ringPlayer.play(EasyApplication.getEasyApplication(), uri, true, AudioManager.STREAM_RING);
+            Uri uri = Uri.parse("android.resource://" + App.getApp().getPackageName() + "/" + R.raw.incoming_call_ring);
+            ringPlayer.play(App.getApp(), uri, true, AudioManager.STREAM_RING);
         }
     }
 

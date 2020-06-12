@@ -13,6 +13,7 @@ package org.webrtc;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -23,11 +24,17 @@ import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.os.Handler;
 
+import android.util.Log;
 import android.util.Range;
 import android.view.Surface;
+
+import com.google.gson.Gson;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.json.JSONException;
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat;
 
 @TargetApi(21)
@@ -101,7 +108,7 @@ class Camera2Session implements CameraSession {
       state = SessionState.STOPPED;
       stopInternal();
       if (startFailure) {
-        callback.onFailure(FailureType.DISCONNECTED, "Camera disconnected / evicted.");
+        callback.onFailure(FailureType.DISCONNECTED, "Camera disconnected  evicted.");
       } else {
         events.onCameraDisconnected(Camera2Session.this);
       }
@@ -126,7 +133,7 @@ class Camera2Session implements CameraSession {
         camera.createCaptureSession(
             Arrays.asList(surface), new CaptureSessionCallback(), cameraThreadHandler);
       } catch (CameraAccessException e) {
-        reportError("Failed to create capture session. " + e);
+        reportError("Failed to create capture session." + e);
         return;
       }
     }
@@ -134,7 +141,6 @@ class Camera2Session implements CameraSession {
     @Override
     public void onClosed(CameraDevice camera) {
       checkIsOnCameraThread();
-
       Logging.d(TAG, "Camera device closed.");
       events.onCameraClosed(Camera2Session.this);
     }
@@ -167,9 +173,11 @@ class Camera2Session implements CameraSession {
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
             new Range<Integer>(captureFormat.framerate.min / fpsUnitFactor,
                 captureFormat.framerate.max / fpsUnitFactor));
-        captureRequestBuilder.set(
-            CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
+        //captureRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, (float)99.0);
+        //captureRequestBuilder.set(CaptureRequest.LENS_FOCAL_LENGTH, (float) 99.0f);
+        captureRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE,CaptureRequest.CONTROL_EFFECT_MODE_MONO);
         chooseStabilizationMode(captureRequestBuilder);
         chooseFocusMode(captureRequestBuilder);
 
@@ -354,6 +362,8 @@ class Camera2Session implements CameraSession {
     } catch (CameraAccessException e) {
       reportError("Failed to open camera: " + e);
       return;
+    } catch (RuntimeException e) {
+      e.printStackTrace();
     }
   }
 

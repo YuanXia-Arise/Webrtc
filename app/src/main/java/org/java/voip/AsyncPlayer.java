@@ -60,9 +60,7 @@ public class AsyncPlayer {
         public void run() {
             while (true) {
                 Command cmd = null;
-
                 synchronized (mCmdQueue) {
-
                     cmd = (Command) mCmdQueue.removeFirst();
                 }
 

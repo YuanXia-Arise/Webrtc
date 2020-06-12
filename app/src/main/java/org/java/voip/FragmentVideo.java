@@ -1,65 +1,53 @@
 package org.java.voip;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.hardware.Camera;
+import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
-
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
-
+import com.dds.libusbcamera.UVCCameraHelper;
+import com.dds.libusbcamera.utils.FileUtils;
 import com.dds.skywebrtc.CallSession;
 import com.dds.skywebrtc.EnumType;
 import com.dds.skywebrtc.SkyEngineKit;
-import com.dds.skywebrtc.UsbCapturer;
-
-import org.SaveFile;
-import org.easydarwin.easypusher.R;
+import com.dds.skywebrtc.Util;
+import com.serenegiant.usb.CameraDialog;
+import com.serenegiant.usb.Size;
+import com.serenegiant.usb.USBMonitor;
+import com.serenegiant.usb.common.AbstractUVCCameraHandler;
+import com.serenegiant.usb.widget.CameraViewInterface;
+import com.webrtc.R;
+import org.webrtc.PrefSingleton;
 import org.webrtc.SurfaceViewRenderer;
-import org.webrtc.VideoSource;
+import java.util.ArrayList;
+import java.util.List;
+
 
 
 /**
- * Created by dds on 2018/7/26.
- * android_shuai@163.com
- * 视频通话控制界面
+ * 一对一视频通话控制界面
  */
-public class FragmentVideo extends Fragment implements CallSession.CallSessionCallback, View.OnClickListener {
+public class FragmentVideo extends Fragment implements CallSession.CallSessionCallback, View.OnClickListener
+        , CameraViewInterface.Callback, CameraDialog.CameraDialogParent{
 
     private FrameLayout fullscreenRenderer;
     private FrameLayout pipRenderer;
-    private LinearLayout inviteeInfoContainer;
-    private ImageView portraitImageView;
-    private TextView nameTextView;
-    private TextView descTextView;
-    private ImageView minimizeImageView;
-    private ImageView outgoingAudioOnlyImageView;
-    private ImageView outgoingHangupImageView;
-    private LinearLayout audioLayout;
-    private ImageView incomingAudioOnlyImageView;
-    private LinearLayout hangupLinearLayout;
-    private ImageView incomingHangupImageView;
-    private LinearLayout acceptLinearLayout;
-    private ImageView acceptImageView;
-    private Chronometer durationTextView;
-    private ImageView connectedAudioOnlyImageView;
-    private ImageView connectedHangupImageView;
-    private ImageView switchCameraImageView;
-
-    private View incomingActionContainer;
-    private View outgoingActionContainer;
-    private View connectedActionContainer;
-
 
     private CallSingleActivity activity;
     private SkyEngineKit gEngineKit;
@@ -69,6 +57,8 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     private SurfaceViewRenderer remoteSurfaceView;
 
     private ImageButton DisCalling;
+
+    private int video_type = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,7 +72,6 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         View view = inflater.inflate(R.layout.fragment_video, container, false);
         initView(view);
         init();
-        //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //设置横屏
         return view;
     }
 
@@ -90,45 +79,42 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     private void initView(View view) {
         fullscreenRenderer = view.findViewById(R.id.fullscreen_video_view);
         pipRenderer = view.findViewById(R.id.pip_video_view);
-        pipRenderer.setVisibility(View.GONE);
-
-        inviteeInfoContainer = view.findViewById(R.id.inviteeInfoContainer);
-        portraitImageView = view.findViewById(R.id.portraitImageView);
-        nameTextView = view.findViewById(R.id.nameTextView);
-        descTextView = view.findViewById(R.id.descTextView);
-        minimizeImageView = view.findViewById(R.id.minimizeImageView);
-        outgoingAudioOnlyImageView = view.findViewById(R.id.outgoingAudioOnlyImageView);
-        outgoingHangupImageView = view.findViewById(R.id.outgoingHangupImageView);
-        audioLayout = view.findViewById(R.id.audioLayout);
-        incomingAudioOnlyImageView = view.findViewById(R.id.incomingAudioOnlyImageView);
-        hangupLinearLayout = view.findViewById(R.id.hangupLinearLayout);
-        incomingHangupImageView = view.findViewById(R.id.incomingHangupImageView);
-        acceptLinearLayout = view.findViewById(R.id.acceptLinearLayout);
-        acceptImageView = view.findViewById(R.id.acceptImageView);
-        durationTextView = view.findViewById(R.id.durationTextView);
-        connectedAudioOnlyImageView = view.findViewById(R.id.connectedAudioOnlyImageView);
-        connectedHangupImageView = view.findViewById(R.id.connectedHangupImageView);
-        switchCameraImageView = view.findViewById(R.id.switchCameraImageView);
-
-        incomingActionContainer = view.findViewById(R.id.incomingActionContainer);
-        outgoingActionContainer = view.findViewById(R.id.outgoingActionContainer);
-        connectedActionContainer = view.findViewById(R.id.connectedActionContainer);
-
-        outgoingHangupImageView.setOnClickListener(this);
-        incomingHangupImageView.setOnClickListener(this);
-        connectedHangupImageView.setOnClickListener(this);
-        acceptImageView.setOnClickListener(this);
-        switchCameraImageView.setOnClickListener(this);
-
-        outgoingAudioOnlyImageView.setOnClickListener(this);
-        incomingAudioOnlyImageView.setOnClickListener(this);
-        connectedAudioOnlyImageView.setOnClickListener(this);
-
-        minimizeImageView.setOnClickListener(this);
 
         DisCalling = view.findViewById(R.id.DisCalling);
         DisCalling.setOnClickListener(this);
+
+        video_type = PrefSingleton.getInstance().getInt("video");
+        if (video_type == 2) {
+            if (mCameraHelper != null) {
+                mCameraHelper.closeCamera();
+                mCameraHelper.release();
+            }
+            Resolv();
+            PrefSingleton.getInstance().putBoolean("USB_Camera",true);
+            mTextureView = view.findViewById(R.id.camera_view);
+            mUVCCameraView = (CameraViewInterface) mTextureView;
+            mUVCCameraView.setCallback(this);
+            mCameraHelper = UVCCameraHelper.getInstance();
+            mCameraHelper.setDefaultFrameFormat(UVCCameraHelper.FRAME_FORMAT_MJPEG);
+            mCameraHelper.initUSBMonitor(getActivity(), mUVCCameraView, listener, WIDTH, HEIGHT);
+            //mCameraHelper.initUSBMonitor(getActivity(), mUVCCameraView, listener);
+
+            mCameraHelper.setOnPreviewFrameListener(new AbstractUVCCameraHandler.OnPreViewResultListener() {
+                @Override
+                public void onPreviewResult(byte[] nv21Yuv) {
+                    System.out.println("123==00");
+                    try {
+                        Thread.sleep(100);
+                        new Util().createFileWithByte(nv21Yuv);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
     }
+
 
     private void init() {
         gEngineKit = activity.getEngineKit();
@@ -136,24 +122,9 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         if (session == null || EnumType.CallState.Idle == session.getState()) {
             activity.finish();
         } else if (EnumType.CallState.Connected == session.getState()) {
-            /*incomingActionContainer.setVisibility(View.GONE);
-            outgoingActionContainer.setVisibility(View.GONE);
-            connectedActionContainer.setVisibility(View.VISIBLE);
-            inviteeInfoContainer.setVisibility(View.GONE);
-            minimizeImageView.setVisibility(View.VISIBLE);*/
             startRefreshTime();
         } else {
-            if (isOutgoing) {
-                /*incomingActionContainer.setVisibility(View.GONE);
-                outgoingActionContainer.setVisibility(View.VISIBLE);
-                connectedActionContainer.setVisibility(View.GONE);*/
-                descTextView.setText(R.string.av_waiting);
-            } else {
-                /*incomingActionContainer.setVisibility(View.VISIBLE);
-                outgoingActionContainer.setVisibility(View.GONE);
-                connectedActionContainer.setVisibility(View.GONE);*/
-                descTextView.setText(R.string.av_video_invite);
-            }
+            // do nothing now
         }
         if (isFromFloatingView) {
             didCreateLocalVideoTrack();
@@ -169,7 +140,6 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
             isOutgoing = activity.isOutgoing();
             isFromFloatingView = activity.isFromFloatingView();
         }
-
     }
 
     @Override
@@ -187,14 +157,7 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     public void didChangeState(EnumType.CallState state) {
         runOnUiThread(() -> {
             if (state == EnumType.CallState.Connected) {
-                /*incomingActionContainer.setVisibility(View.GONE);
-                outgoingActionContainer.setVisibility(View.GONE);
-                connectedActionContainer.setVisibility(View.VISIBLE);
-                inviteeInfoContainer.setVisibility(View.GONE);*/
-                descTextView.setVisibility(View.GONE);
-                //minimizeImageView.setVisibility(View.VISIBLE);
-                // 开启计时器
-                startRefreshTime();
+                startRefreshTime(); // 开启计时器
             } else {
                 // do nothing now
             }
@@ -254,6 +217,7 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
         if (localSurfaceView != null) {
             localSurfaceView.release();
         }
@@ -263,14 +227,20 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         fullscreenRenderer.removeAllViews();
         pipRenderer.removeAllViews();
 
-        if (durationTextView != null) {
-            durationTextView.stop();
-        }
-
         //挂断
         CallSession session = gEngineKit.getCurrentSession();
         if (session != null) {
             SkyEngineKit.Instance().endCall();
+
+            if(PrefSingleton.getInstance().getInt("video") == 2) {
+                PrefSingleton.getInstance().putBoolean("USB_Camera",false);
+                FileUtils.releaseFile();
+                mCameraHelper.closeCamera();
+                if (mCameraHelper != null) {
+                    mCameraHelper.release();
+                }
+            }
+
             activity.finish();
         } else {
             activity.finish();
@@ -280,47 +250,21 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
     @Override
     public void onClick(View v) {
         int id = v.getId();
-
         CallSession session = gEngineKit.getCurrentSession();
-        if (id == R.id.acceptImageView) { // 接听
-            if (session != null && session.getState() == EnumType.CallState.Incoming) {
-                session.joinHome();
-            } else {
-                activity.finish();
-            }
-        }
-
-        if (id == R.id.incomingHangupImageView ||
-                id == R.id.outgoingHangupImageView ||
-                id == R.id.connectedHangupImageView) { // 挂断
-            if (session != null) {
-                SkyEngineKit.Instance().endCall();
-                activity.finish();
-            } else {
-                activity.finish();
-            }
-        }
-
-        if (id == R.id.switchCameraImageView) { // 切换摄像头
-            if (session != null) {
-                session.switchCamera();
-            }
-        }
-
-        if (id == R.id.outgoingAudioOnlyImageView || id == R.id.incomingAudioOnlyImageView ||
-                id == R.id.connectedAudioOnlyImageView) { // 切换到语音拨打
-            if (session != null) {
-                session.switchToAudio();
-            }
-        }
-
-        if (id == R.id.minimizeImageView) { // 小窗
-            activity.showFloatingView();
-        }
 
         if (id == R.id.DisCalling) { // 挂断
             if (session != null) {
                 SkyEngineKit.Instance().endCall();
+
+                if(PrefSingleton.getInstance().getInt("video") == 2) {
+                    PrefSingleton.getInstance().putBoolean("USB_Camera",false);
+                    FileUtils.releaseFile();
+                    mCameraHelper.closeCamera();
+                    if (mCameraHelper != null) {
+                        mCameraHelper.release();
+                    }
+                }
+
                 activity.finish();
             } else {
                 activity.finish();
@@ -333,10 +277,131 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         if (session == null) {
             return;
         }
-        if (durationTextView != null) {
-            durationTextView.setVisibility(View.VISIBLE);
-            durationTextView.setBase(SystemClock.elapsedRealtime() - (System.currentTimeMillis() - session.getStartTime()));
-            durationTextView.start();
+    }
+
+
+    /**
+     * 集成UVC采集视频
+     */
+    public View mTextureView;
+    private UVCCameraHelper mCameraHelper;
+    private CameraViewInterface mUVCCameraView;
+    private boolean isRequest;
+    private boolean isPreview;
+
+    private UVCCameraHelper.OnMyDevConnectListener listener = new UVCCameraHelper.OnMyDevConnectListener() {
+
+        @Override
+        public void onAttachDev(UsbDevice device) {
+            // request open permission
+            if (!isRequest) {
+                isRequest = true;
+                if (mCameraHelper != null) {
+                    mCameraHelper.requestPermission(0);
+                }
+            }
+        }
+
+        @Override
+        public void onDettachDev(UsbDevice device) {
+            // close camera
+            if (isRequest) {
+                isRequest = false;
+                mCameraHelper.closeCamera();
+            }
+        }
+
+        @Override
+        public void onConnectDev(UsbDevice device, boolean isConnected) {
+            if (!isConnected) {
+                isPreview = false;
+            } else {
+                isPreview = true;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Looper.prepare();
+                        if(mCameraHelper != null && mCameraHelper.isCameraOpened()) {
+                        }
+                        Looper.loop();
+                    }
+                }).start();
+            }
+        }
+
+        @Override
+        public void onDisConnectDev(UsbDevice device) {
+            return;
+        }
+    };
+
+    @Override
+    public void onSurfaceCreated(CameraViewInterface view, Surface surface) {
+        if (!isPreview && mCameraHelper.isCameraOpened()) {
+            mCameraHelper.startPreview(mUVCCameraView);
+            isPreview = true;
         }
     }
+
+    @Override
+    public void onSurfaceChanged(CameraViewInterface view, Surface surface, int width, int height) {
+
+    }
+
+    @Override
+    public void onSurfaceDestroy(CameraViewInterface view, Surface surface) {
+        if (isPreview && mCameraHelper.isCameraOpened()) {
+            mCameraHelper.stopPreview();
+            isPreview = false;
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // step.2 register USB event broadcast
+        if (mCameraHelper != null) {
+            mCameraHelper.registerUSB();
+        }
+    }
+    @Override
+    public USBMonitor getUSBMonitor() {
+        return mCameraHelper.getUSBMonitor();
+    }
+
+    @Override
+    public void onDialogResult(boolean canceled) {
+        if (canceled) {
+        }
+    }
+
+    /**
+     * 分辨率数据获取
+     */
+    private int WIDTH = 1920;
+    private int HEIGHT = 1080;
+    public void Resolv() {
+        int resolv = PrefSingleton.getInstance().getInt("resolv");
+        switch (resolv) {
+
+            case 4:
+                WIDTH = 640;
+                HEIGHT = 480;
+                break;
+            case 5:
+                WIDTH = 800;
+                HEIGHT = 600;
+                break;
+            case 6:
+                WIDTH = 1280;
+                HEIGHT = 960;
+                break;
+        }
+    }
+
 }

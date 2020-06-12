@@ -56,7 +56,7 @@ public class MediaStreamTrack {
   }
 
   /** Factory method to create an AudioTrack or VideoTrack subclass. */
-  static   MediaStreamTrack createMediaStreamTrack(long nativeTrack) {
+  static  MediaStreamTrack createMediaStreamTrack(long nativeTrack) {
     if (nativeTrack == 0) {
       return null;
     }

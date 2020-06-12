@@ -78,14 +78,16 @@ public class UVCCameraHelper {
         void onDisConnectDev(UsbDevice device);
     }
 
-    public void initUSBMonitor(Activity activity, CameraViewInterface cameraView, final OnMyDevConnectListener listener) {
+    public void initUSBMonitor(Activity activity, CameraViewInterface cameraView, final OnMyDevConnectListener listener,
+                               int width, int height) {
         this.mActivity = activity;
         this.mCamView = cameraView;
 
         mUSBMonitor = new USBMonitor(activity.getApplicationContext(), new USBMonitor.OnDeviceConnectListener() {
 
-            // called by checking usb device
-            // do request device permission
+            /** called by checking usb device
+             *  do request device permission
+            **/
             @Override
             public void onAttach(UsbDevice device) {
                 if (listener != null) {
@@ -93,8 +95,11 @@ public class UVCCameraHelper {
                 }
             }
 
-            // called by taking out usb device
-            // do close camera
+            /** called by taking out usb device
+             *  do close camera
+             *
+             * @param device
+             */
             @Override
             public void onDettach(UsbDevice device) {
                 if (listener != null) {
@@ -102,8 +107,12 @@ public class UVCCameraHelper {
                 }
             }
 
-            // called by connect to usb camera
-            // do open camera,start previewing
+            /** called by connect to usb camera
+             * do open camera,start previewing
+             * @param device
+             * @param ctrlBlock
+             * @param createNew
+             */
             @Override
             public void onConnect(final UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock, boolean createNew) {
                 mCtrlBlock = ctrlBlock;
@@ -114,11 +123,14 @@ public class UVCCameraHelper {
                         // wait for camera created
                         try {
                             Thread.sleep(500);
+                            startPreview(mCamView);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
+                        } catch (IllegalArgumentException e){
+
                         }
                         // start previewing
-                        startPreview(mCamView);
+                        //startPreview(mCamView);
                     }
                 }).start();
                 if(listener != null) {
@@ -126,8 +138,11 @@ public class UVCCameraHelper {
                 }
             }
 
-            // called by disconnect to usb camera
-            // do nothing
+            /**
+             * called by disconnect to usb camera
+             * @param device
+             * @param ctrlBlock
+             */
             @Override
             public void onDisconnect(UsbDevice device, USBMonitor.UsbControlBlock ctrlBlock) {
                 if (listener != null) {
@@ -140,10 +155,10 @@ public class UVCCameraHelper {
             }
         });
 
-        createUVCCamera();
+        createUVCCamera(width, height);
     }
 
-    public void createUVCCamera() {
+    public void createUVCCamera(int width, int height) {
         if (mCamView == null)
             throw new NullPointerException("CameraViewInterface cannot be null!");
 
@@ -153,9 +168,9 @@ public class UVCCameraHelper {
             mCameraHandler = null;
         }
         // initialize camera handler
-        mCamView.setAspectRatio(previewWidth / (float)previewHeight);
+        mCamView.setAspectRatio(width / (float)height);
         mCameraHandler = UVCCameraHandler.createHandler(mActivity, mCamView, 2,
-                previewWidth, previewHeight, mFrameFormat);
+                width, height, mFrameFormat);
     }
 
     public void updateResolution(int width, int height) {
@@ -365,5 +380,6 @@ public class UVCCameraHelper {
     public int getPreviewHeight() {
         return previewHeight;
     }
+
 
 }

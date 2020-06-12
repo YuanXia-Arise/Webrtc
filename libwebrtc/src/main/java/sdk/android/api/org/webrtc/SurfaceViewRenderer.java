@@ -84,7 +84,7 @@ public class SurfaceViewRenderer extends SurfaceView
     this.rendererEvents = rendererEvents;
     rotatedFrameWidth = 0;
     rotatedFrameHeight = 0;
-    eglRenderer.init(sharedContext, this /* rendererEvents */, configAttributes, drawer);
+    eglRenderer.init(sharedContext, this, configAttributes, drawer);
   }
 
   /**
@@ -104,7 +104,7 @@ public class SurfaceViewRenderer extends SurfaceView
    *                 It should be lightweight and must not call removeFrameListener.
    * @param scale    The scale of the Bitmap passed to the callback, or 0 if no Bitmap is
    *                 required.
-   * @param drawer   Custom drawer to use for this frame listener.
+   * @param drawerParam   Custom drawer to use for this frame listener.
    */
   public void addFrameListener(
       EglRenderer.FrameListener listener, float scale, RendererCommon.GlDrawer drawerParam) {

@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Camera业务处理抽象类
@@ -814,6 +816,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
 //					videoEncoder.frameAvailableSoon();
 //					videoEncoder.encode(frame);
 //				}
+
                 int len = frame.capacity();
                 final byte[] yuv = new byte[len];
                 frame.get(yuv);
@@ -837,7 +840,6 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     if(isSupportOverlay) {
                         TxtOverlay.getInstance().overlay(yuv, new SimpleDateFormat("yyyy-MM-dd EEEE HH:mm:ss").format(new Date()));
                     }
-
                     mH264Consumer.setRawYuv(yuv, mWidth, mHeight);
                 }
             }
@@ -976,7 +978,6 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     mListener.onEncodeResult(data, offset, length, timestamp, type);
                 }
             }
-
         };
 
 //		private void loadShutterSound(final Context context) {

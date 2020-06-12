@@ -73,7 +73,7 @@ class WebRtcAudioTrack {
   private volatile boolean speakerMute;
   private byte[] emptyBytes;
 
-  private final   AudioTrackErrorCallback errorCallback;
+  private final AudioTrackErrorCallback errorCallback;
 
   /**
    * Audio thread which keeps calling AudioTrack.write() to stream audio.

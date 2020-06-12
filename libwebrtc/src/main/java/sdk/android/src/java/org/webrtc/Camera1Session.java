@@ -11,16 +11,23 @@
 package org.webrtc;
 
 import android.content.Context;
+import android.hardware.Camera;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.preference.Preference;
+import android.util.Log;
+
+import com.google.gson.Gson;
 
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.security.Policy;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+//import com.serenegiant.usb.UVCCamera;
 @SuppressWarnings("deprecation")
 class Camera1Session implements CameraSession {
   private static final String TAG = "Camera1Session";
@@ -42,6 +49,7 @@ class Camera1Session implements CameraSession {
   private final SurfaceTextureHelper surfaceTextureHelper;
   private final int cameraId;
   private final android.hardware.Camera camera;
+  //private UVCCamera mCamera;
   private final android.hardware.Camera.CameraInfo info;
   private final CaptureFormat captureFormat;
   // Used only for stats. Only used on the camera thread.
@@ -59,7 +67,6 @@ class Camera1Session implements CameraSession {
     final long constructionTimeNs = System.nanoTime();
     Logging.d(TAG, "Open camera " + cameraId);
     events.onCameraOpening();
-
     final android.hardware.Camera camera;
     try {
       camera = android.hardware.Camera.open(cameraId);
@@ -120,6 +127,7 @@ class Camera1Session implements CameraSession {
     parameters.setPreviewFpsRange(captureFormat.framerate.min, captureFormat.framerate.max);
     parameters.setPreviewSize(captureFormat.width, captureFormat.height);
     parameters.setPictureSize(pictureSize.width, pictureSize.height);
+    parameters.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
     if (!captureToTexture) {
       parameters.setPreviewFormat(captureFormat.imageFormat);
     }
@@ -268,8 +276,7 @@ class Camera1Session implements CameraSession {
       final VideoFrame modifiedFrame = new VideoFrame(
           CameraSession.createTextureBufferWithModifiedTransformMatrix(
               (TextureBufferImpl) frame.getBuffer(),
-              /* mirror= */ info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT,
-              /* rotation= */ 0),
+                  info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT,0),
           /* rotation= */ getFrameOrientation(), frame.getTimestampNs());
       events.onFrameCaptured(Camera1Session.this, modifiedFrame);
       modifiedFrame.release();
@@ -327,4 +334,6 @@ class Camera1Session implements CameraSession {
       throw new IllegalStateException("Wrong thread");
     }
   }
+
+
 }

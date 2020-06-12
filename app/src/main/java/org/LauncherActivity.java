@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,34 +21,32 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.dds.skywebrtc.PrefSingleton;
 import com.dds.skywebrtc.SkyEngineKit;
-
-import org.easydarwin.easypusher.R;
+import com.webrtc.R;
 import org.java.socket.IUserState;
 import org.java.socket.SocketManager;
 import org.java.voip.CallSingleActivity;
 import org.java.voip.VoipEvent;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.webrtc.PrefSingleton;
 
 import java.net.URI;
 
 import cn.wch.ch34xuartdriver.CH34xUARTDriver;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static org.easydarwin.easypusher.EasyApplication.BUS;
-import static org.easydarwin.easypusher.MainActivity.REQUEST_CAMERA_PERMISSION;
+import static org.App.BUS;
 
 
 public class LauncherActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, IUserState {
 
     private static final String ACTION_USB_PERMISSION = "cn.wch.wchusbdriver.USB_PERMISSION";
+
+    public static final int REQUEST_CAMERA_PERMISSION = 1003;
 
     private ImageButton imageButton,Calling;
     private Switch aSwitch,bSwitch,cSwitch;
@@ -83,6 +80,9 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
         bSwitch.setOnCheckedChangeListener(this);
         cSwitch = findViewById(R.id.button3);
         cSwitch.setOnCheckedChangeListener(this);
+        PrefSingleton.getInstance().putBoolean("flow_mode", false);
+        PrefSingleton.getInstance().putBoolean("key_mode", false);
+        PrefSingleton.getInstance().putBoolean("voice_mode", false);
         switch1 = findViewById(R.id.switch1);
         switch2 = findViewById(R.id.switch2);
         switch3 = findViewById(R.id.switch3);
@@ -97,7 +97,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
         imageView2.setVisibility(View.INVISIBLE);
 
         BUS.register(this);
-        Permission();
+        Permission(); // 动态权限
         CH34x(); // 配置ch34x参数
 
         try {
@@ -111,9 +111,11 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
     public void Permission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
+                    Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_CAMERA_PERMISSION);
             return;
         } else {
             // resume
@@ -155,8 +157,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
                         new String[]{Manifest.permission.ACCESS_NETWORK_STATE},1);
             } else {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_NETWORK_STATE},
-                        1);
+                        new String[]{Manifest.permission.ACCESS_NETWORK_STATE},1);
             }
         }
     }
@@ -195,9 +196,16 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
             try {
                 JSONObject jsonObj = new JSONObject(message);
                 if (jsonObj.length() == 2 && jsonObj.get("methon").equals("ZOOM")) {
-
+                    android.hardware.Camera camera = null;
+                    Camera.Parameters parameters = camera.getParameters();
+                    parameters.setZoom(99);
+                    camera.setParameters(parameters);
                 } else {
-                    new WebSocket().GetData(message);
+                    boolean key_mode = PrefSingleton.getInstance().getBoolean("key_mode");
+                    if (key_mode) {
+                        new WebSocket().GetData(message);
+                    }
+                    //new WebSocket().GetData(message);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -210,10 +218,10 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.settings:
+            case R.id.settings: //设置
                 startActivity(new Intent(this, SetupActivity.class));
                 break;
-            case R.id.Calling:
+            case R.id.Calling: //拨打
                 onCall();
                 break;
             default:
@@ -376,7 +384,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
         if (isOpen) {
             isOpen = false;
             try {
-                Thread.sleep(200);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -395,5 +403,10 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
 
         SocketManager.getInstance().unConnect();
         super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 }

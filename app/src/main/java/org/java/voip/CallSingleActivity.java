@@ -24,7 +24,7 @@ import com.dds.skywebrtc.except.NotInitializedException;
 import com.dds.skywebrtc.permission.Permissions;
 
 
-import org.easydarwin.easypusher.R;
+import com.webrtc.R;
 import org.java.socket.SocketManager;
 
 import java.util.UUID;
