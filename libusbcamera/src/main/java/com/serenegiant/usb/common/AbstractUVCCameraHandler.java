@@ -20,6 +20,8 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import androidx.annotation.NonNull;
+
 import com.TxtOverlay;
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.Size;
@@ -54,6 +56,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
+
+import static androidx.core.math.MathUtils.clamp;
 
 /**
  * Camera业务处理抽象类
@@ -795,7 +799,6 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     e.printStackTrace();
                 }
             }
-
 //			isAudioThreadStart = false;
         }
 
@@ -804,6 +807,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         public void handleStillPicture(String picPath) {
             this.picPath = picPath;
         }
+
 
         private final IFrameCallback mIFrameCallback = new IFrameCallback() {
             @Override

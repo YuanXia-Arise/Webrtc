@@ -78,8 +78,7 @@
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
-            android:theme="@style/AppTheme.NoActionBar"
-            >
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="${applicationId}.kit.voip.single" />
 

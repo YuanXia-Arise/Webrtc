@@ -298,7 +298,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
 
     //一对一拨打视频
     public void onCall(){
-        String wss = PrefSingleton.getInstance().getString("Url");
+        /*String wss = PrefSingleton.getInstance().getString("Url");
         String uesr_id = "001";
         SocketManager.getInstance().connect(wss, uesr_id, 0);
         try {
@@ -313,7 +313,18 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
             String phone = "002";
             SkyEngineKit.init(new VoipEvent());
             CallSingleActivity.openActivity(this, phone, true, false);
+        }*/
+
+        String wss = PrefSingleton.getInstance().getString("Url");
+        String room_id = "122";
+        try {
+            Thread.sleep(100);
+            //WebrtcUtil.callSingle(this, wss, room_id,true); //one to one
+            WebrtcUtil.call(this, wss, room_id);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override

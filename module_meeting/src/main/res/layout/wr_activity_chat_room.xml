@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/wr_background"
+    android:orientation="vertical">
+
+
+    <FrameLayout
+        android:id="@+id/wr_video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:elevation="2dp"/>
+
+
+    <!--<FrameLayout
+        android:id="@+id/wr_container"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"/>-->
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:elevation="1dp">
+
+        <com.serenegiant.usb.widget.UVCCameraTextureView
+            android:id="@+id/camera_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:rotation="0"/>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="67.2dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:background="@drawable/rectangle"
+        android:elevation="3dp">
+
+        <ImageView
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="30dp"
+            android:background="@drawable/ic_calls" />
+
+        <ImageButton
+            android:id="@+id/DisCalling"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="36dp"
+            android:layout_marginTop="13dp"
+            android:background="@drawable/ic_calling"/>
+    </RelativeLayout>
+
+
+</RelativeLayout>

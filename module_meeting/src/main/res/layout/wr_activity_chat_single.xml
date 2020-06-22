@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.ChatSingleActivity">
+
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/local_view_render"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:elevation="2dp"/>
+
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/remote_view_render"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:elevation="1dp"/>
+
+    <RelativeLayout
+        android:id="@+id/wr_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="3dp"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:elevation="1dp">
+
+        <com.serenegiant.usb.widget.UVCCameraTextureView
+            android:id="@+id/camera_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:rotation="90"/>
+    </FrameLayout>
+
+</RelativeLayout>

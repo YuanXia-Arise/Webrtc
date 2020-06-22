@@ -497,21 +497,20 @@ class AndroidVideoDecoder implements VideoDecoder, VideoSink {
       // All other supported color formats are NV12.
       frameBuffer = copyNV12ToI420Buffer(buffer, stride, sliceHeight, width, height);
     }
-    codec.releaseOutputBuffer(result, /* render= */ false);
+    codec.releaseOutputBuffer(result, false);
 
     long presentationTimeNs = info.presentationTimeUs * 1000;
     VideoFrame frame = new VideoFrame(frameBuffer, rotation, presentationTimeNs);
 
     // Note that qp is parsed on the C++ side.
-    callback.onDecodedFrame(frame, decodeTimeMs, null /* qp */);
+    callback.onDecodedFrame(frame, decodeTimeMs, null);
     frame.release();
   }
 
   private VideoFrame.Buffer copyNV12ToI420Buffer(
       ByteBuffer buffer, int stride, int sliceHeight, int width, int height) {
     // toI420 copies the buffer.
-    return new NV12Buffer(width, height, stride, sliceHeight, buffer, null /* releaseCallback */)
-        .toI420();
+    return new NV12Buffer(width, height, stride, sliceHeight, buffer, null).toI420();
   }
 
   private VideoFrame.Buffer copyI420Buffer(

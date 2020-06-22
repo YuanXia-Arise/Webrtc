@@ -95,6 +95,7 @@ public class EglRenderer implements VideoSink {
     public void dispatchMessage(Message msg) {
       try {
         super.dispatchMessage(msg);
+      } catch (RuntimeException e) {
       } catch (Exception e) {
         Logging.e(TAG, "Exception on EglRenderer thread", e);
         exceptionCallback.run();

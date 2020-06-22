@@ -549,16 +549,6 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                 _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
                 _localStream.addTrack(_localVideoTrack);
             } else if (video_type == 2) { // 视频源2 USB采集卡
-                //UsbCapturer usbCapturer = new UsbCapturer(mContext,localRenderer);
-                /*UsbCapturer usbCapturer = new UsbCapturer(mContext);
-                usbCapturer.getMonitor();
-                surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", mRootEglBase.getEglBaseContext());
-                videoSource = _factory.createVideoSource(usbCapturer.isScreencast());
-                usbCapturer.initialize(surfaceTextureHelper,mContext,videoSource.getCapturerObserver());
-                usbCapturer.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
-                _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-                _localStream.addTrack(_localVideoTrack);*/
-
                 try {
                     Thread.sleep(200);
                 } catch (Exception e) {
@@ -587,11 +577,10 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
                     if (frame != null) {
                         Log.d(TAG, "123==1");
                         imageArrayLock.lock();
-                        byte[] imageArray = new byte[frame.capacity()];
-                        //byte[] imageArray = new byte[frame.remaining()];
+                        byte[] imageArray = new byte[frame.capacity()]; // frame.remaining()
                         frame.get(imageArray);
                         long imageTime = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
-                        VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, width_usb, height_usb, null);
+                        VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, width_usb, height_usb,null);
                         VideoFrame videoFrame = new VideoFrame(mNV21Buffer, 90, imageTime);
                         videoSource.getCapturerObserver().onFrameCaptured(videoFrame);
                         videoFrame.release();
@@ -800,49 +789,4 @@ public class CallSession implements NetworkMonitor.NetworkObserver {
         }
     }
 
-    public void USBCamera_work() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (Usb_Camera){
-                    try {
-                        Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
-                        byte[] bytes = new Util().readFileToByteArray();
-                        ByteBuffer frame = ByteBuffer.wrap(bytes);
-                        if (frame != null) {
-                            Log.d(TAG, "123==1");
-                            imageArrayLock.lock();
-                            byte[] imageArray = new byte[frame.remaining()];
-                            frame.get(imageArray);
-                            long imageTime = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
-                            VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, VIDEO_RESOLUTION_WIDTH,
-                                    VIDEO_RESOLUTION_HEIGHT,null);
-                            VideoFrame mVideoFrame = new VideoFrame(mNV21Buffer, 90, imageTime);
-                            videoSource.getCapturerObserver().onFrameCaptured(mVideoFrame);
-                            mVideoFrame.release();
-                            imageArrayLock.unlock();
-                            _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-                            _localStream.addTrack(_localVideoTrack);
-                            /*imageArrayLock.lock();
-                            byte[] imageArray = new byte[frame.remaining()];
-                            frame.get(imageArray);
-                            frame.rewind();
-                            NV21Buffer nv21Buffer = new NV21Buffer(imageArray,VIDEO_RESOLUTION_WIDTH,VIDEO_RESOLUTION_HEIGHT, null);
-                            VideoFrame videoFrame = new VideoFrame(nv21Buffer, 90, System.nanoTime());
-                            videoSource.getCapturerObserver().onFrameCaptured(videoFrame);
-                            videoFrame.release();
-                            imageArrayLock.unlock();
-                            _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-                            _localStream.addTrack(_localVideoTrack);*/
-
-                        }
-                    } catch (NullPointerException e) {
-
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
-        }).start();
-    }
 }

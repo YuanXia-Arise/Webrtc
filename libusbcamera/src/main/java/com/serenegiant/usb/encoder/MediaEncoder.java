@@ -505,9 +505,6 @@ public abstract class MediaEncoder implements Runnable {
 							System.arraycopy(mPpsSps, 0, h264, 0, mPpsSps.length);
 							encodedData.get(h264, mPpsSps.length, mBufferInfo.size);
 
-							//mEasyPusher.start("139.224.12.24","554","11111",1);
-							//mEasyPusher.push(h264, 0, mPpsSps.length + mBufferInfo.size, mBufferInfo.presentationTimeUs / 1000, 2);
-
 							if(mListener != null) {
 								mListener.onEncodeResult(h264, 0,mPpsSps.length + mBufferInfo.size, mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);
 							}
@@ -515,8 +512,6 @@ public abstract class MediaEncoder implements Runnable {
 						} else {
 							encodedData.get(h264, 0, mBufferInfo.size);
 
-							//mEasyPusher.start("139.224.12.24","554","11111",1);
-							//mEasyPusher.push(h264, 0, mBufferInfo.size, mBufferInfo.presentationTimeUs / 1000, 1);
 
 							if(mListener != null) {
 								mListener.onEncodeResult(h264, 0,mBufferInfo.size, mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);

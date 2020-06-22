@@ -20,8 +20,7 @@ public class NV12Buffer implements VideoFrame.Buffer {
   private final ByteBuffer buffer;
   private final RefCountDelegate refCountDelegate;
 
-  public NV12Buffer(int width, int height, int stride, int sliceHeight, ByteBuffer buffer,
-        Runnable releaseCallback) {
+  public NV12Buffer(int width, int height, int stride, int sliceHeight, ByteBuffer buffer, Runnable releaseCallback) {
     this.width = width;
     this.height = height;
     this.stride = stride;

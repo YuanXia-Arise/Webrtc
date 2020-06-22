@@ -173,6 +173,7 @@ public class ThreadUtils {
             public void run() {
                 try {
                     result.value = callable.call();
+                } catch (RuntimeException e) {
                 } catch (Exception e) {
                     caughtException.e = e;
                 }

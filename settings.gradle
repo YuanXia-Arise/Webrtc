@@ -1,1 +1,1 @@
-include ':app', ':libwebrtc', ':module_p2pchat','libusbcamera'
+include ':app', ':libwebrtc', ':module_p2pchat',':module_meeting','libusbcamera'

@@ -1,6 +1,13 @@
 package org.java.voip;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Looper;
@@ -19,6 +26,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import com.dds.libusbcamera.UVCCameraHelper;
@@ -35,9 +44,18 @@ import com.serenegiant.usb.widget.CameraViewInterface;
 import com.webrtc.R;
 import org.webrtc.PrefSingleton;
 import org.webrtc.SurfaceViewRenderer;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static androidx.core.math.MathUtils.clamp;
 
 
 /**
@@ -105,7 +123,8 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
                     System.out.println("123==00");
                     try {
                         Thread.sleep(100);
-                        new Util().createFileWithByte(nv21Yuv);
+                        new Util().createFileWithByte(nv21Yuv, WIDTH, HEIGHT);
+                        //new Util().createFileWithByte(fetchNV21(createBitmap(nv21Yuv,WIDTH,HEIGHT)));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -114,7 +133,6 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
         }
 
     }
-
 
     private void init() {
         gEngineKit = activity.getEngineKit();
@@ -402,6 +420,64 @@ public class FragmentVideo extends Fragment implements CallSession.CallSessionCa
                 HEIGHT = 960;
                 break;
         }
+    }
+
+    /**
+     * UVC byte[] nv21Yuv 数据灰度处理
+     * byte转bitmap
+     * bitmap中提取YUV分量
+     */
+    public static Bitmap createBitmap(byte[] values, int picW, int picH) {
+        if(values == null || picW <= 0 || picH <= 0)
+            return null;
+        Bitmap bitmap = Bitmap.createBitmap(picW, picH, Bitmap.Config.ARGB_8888);
+        int pixels[] = new int[picW * picH];
+        for (int i = 0; i < pixels.length; ++i) {
+            pixels[i] = values[i] * 256 * 256 + values[i] * 256 + values[i] + 0xFF000000;
+        }
+        bitmap.setPixels(pixels, 0, picW, 0, 0, picW, picH);
+        values = null;
+        pixels = null;
+        return bitmap;
+    }
+
+    public byte[] fetchNV21(Bitmap bitmap) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        int size = w * h;
+        int[] pixels = new int[size];
+        bitmap.getPixels(pixels,0, w,0,0, w, h);
+        byte[] nv21 = new byte[size * 3 / 2];
+
+        w &= ~1;
+        h &= ~1;
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                int yIndex = i * w + j;
+
+                int argb = pixels[yIndex];
+                int a = (argb >> 24) & 0xff;  // unused
+                int r = (argb >> 16) & 0xff;
+                int g = (argb >> 8) & 0xff;
+                int b = argb & 0xff;
+
+                int y = ((66 * r + 129 * g + 25 * b + 128) >> 8) + 16;
+                y = clamp(y, 16, 255);
+                nv21[yIndex] = (byte)y;
+
+                if (i % 2 == 0 && j % 2 == 0) {
+                    int u = ((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128;
+                    int v = ((112 * r - 94 * g -18 * b + 128) >> 8) + 128;
+
+                    u = clamp(u, 0, 255);
+                    v = clamp(v, 0, 255);
+
+                    nv21[size + i / 2 * w + j] = (byte) v;
+                    nv21[size + i / 2 * w + j + 1] = (byte) u;
+                }
+            }
+        }
+        return nv21;
     }
 
 }
