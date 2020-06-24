@@ -53,7 +53,7 @@ public class WebrtcUtil {
         WebRTCManager.getInstance().connect(videoEnable ? MediaType.TYPE_VIDEO : MediaType.TYPE_AUDIO, roomId);
     }
 
-    // Videoconferencing
+    // meeting
     public static void call(Activity activity, String wss, String roomId) {
         if (TextUtils.isEmpty(wss)) {
             wss = WSS;

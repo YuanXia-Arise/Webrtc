@@ -62,13 +62,12 @@ public class PeerConnectionFactory {
     final boolean enableInternalTracer;
     final NativeLibraryLoader nativeLibraryLoader;
     final String nativeLibraryName;
-      Loggable loggable;
-      Severity loggableSeverity;
+    Loggable loggable;
+    Severity loggableSeverity;
 
     private InitializationOptions(Context applicationContext, String fieldTrials,
-        boolean enableInternalTracer, NativeLibraryLoader nativeLibraryLoader,
-        String nativeLibraryName,   Loggable loggable,
-          Severity loggableSeverity) {
+                                  boolean enableInternalTracer, NativeLibraryLoader nativeLibraryLoader,
+                                  String nativeLibraryName,   Loggable loggable, Severity loggableSeverity) {
       this.applicationContext = applicationContext;
       this.fieldTrials = fieldTrials;
       this.enableInternalTracer = enableInternalTracer;
@@ -88,8 +87,8 @@ public class PeerConnectionFactory {
       private boolean enableInternalTracer;
       private NativeLibraryLoader nativeLibraryLoader = new NativeLibrary.DefaultLoader();
       private String nativeLibraryName = "jingle_peerconnection_so";
-        private Loggable loggable;
-        private Severity loggableSeverity;
+      private Loggable loggable;
+      private Severity loggableSeverity;
 
       Builder(Context applicationContext) {
         this.applicationContext = applicationContext;

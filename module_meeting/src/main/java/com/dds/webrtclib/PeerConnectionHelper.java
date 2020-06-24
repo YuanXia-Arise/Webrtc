@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.dds.webrtclib.bean.MyIceServer;
 import com.dds.webrtclib.ws.IWebSocket;
+import com.google.gson.Gson;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -144,7 +145,6 @@ public class PeerConnectionHelper {
             if (_localStream == null) {
                 createLocalStream();
             }
-
             createPeerConnections();
             addStreams();
             createOffers();
@@ -281,10 +281,6 @@ public class PeerConnectionHelper {
                 new Thread_USB().start();
             }
         }
-
-        /*if (viewCallback != null) {
-            viewCallback.onSetLocalStream(_localStream, _myId);
-        }*/
     }
 
     private boolean Usb_Camera = true;
@@ -298,7 +294,7 @@ public class PeerConnectionHelper {
             while (Usb_Camera){
                 try {
                     Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                     byte[] bytes = new Util().readFileToByteArray();
                     ByteBuffer frame = ByteBuffer.wrap(bytes);
                     System.out.println("123==1");
@@ -307,18 +303,23 @@ public class PeerConnectionHelper {
                         byte[] imageArray = new byte[frame.capacity()]; // frame.remaining()
                         frame.get(imageArray);
                         long imageTime = TimeUnit.MILLISECONDS.toNanos(SystemClock.elapsedRealtime());
-                        VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, width_usb, height_usb,null).toI420();
+                        //VideoFrame.Buffer mNV21Buffer = new NV21Buffer(imageArray, width_usb, height_usb,null);
+                        VideoFrame.Buffer mNV21Buffer = new NV21Buffer(nv21ToI420(imageArray,width_usb,height_usb),
+                                width_usb, height_usb,null);
                         VideoFrame videoFrame = new VideoFrame(mNV21Buffer, 0, imageTime);
                         Log.d(TAG, "123==7");
                         videoSource.getCapturerObserver().onFrameCaptured(videoFrame);
                         videoFrame.release();
                         imageArrayLock.unlock();
                         _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+                        videoSource.dispose();
+
                         _localStream.addTrack(_localVideoTrack);
 
                         if (viewCallback != null) {
                             viewCallback.onSetLocalStream(_localStream, _myId);
                         }
+
                     }
                 } catch (NullPointerException e) {
 
@@ -329,6 +330,23 @@ public class PeerConnectionHelper {
                 }
             }
         }
+    }
+
+    public static byte[] nv21ToI420(byte[] data, int width, int height) {
+        byte[] ret = new byte[data.length];
+        int total = width * height;
+
+        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);
+        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4);
+        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4);
+
+        bufferY.put(data, 0, total);
+        for (int i=total; i<data.length; i+=2) {
+            bufferV.put(data[i]);
+            bufferU.put(data[i+1]);
+        }
+
+        return ret;
     }
 
 
@@ -427,7 +445,7 @@ public class PeerConnectionHelper {
                 audioSource = null;
             }
 
-            if (videoSource != null) {
+            if (videoSource != null && PrefSingleton.getInstance().getInt("video") == 1) {
                 videoSource.dispose();
                 videoSource = null;
             }
@@ -464,8 +482,10 @@ public class PeerConnectionHelper {
     private VideoCapturer createVideoCapture() {
         VideoCapturer videoCapturer;
         if (useCamera2()) {
+            System.out.println("3333==0");
             videoCapturer = createCameraCapture(new Camera2Enumerator(_context));
         } else {
+            System.out.println("3333==1");
             videoCapturer = createCameraCapture(new Camera1Enumerator(true));
         }
         return videoCapturer;
@@ -519,6 +539,17 @@ public class PeerConnectionHelper {
                 new MediaConstraints.KeyValuePair(AUDIO_HIGH_PASS_FILTER_CONSTRAINT, "true"));
         audioConstraints.mandatory.add(
                 new MediaConstraints.KeyValuePair(AUDIO_NOISE_SUPPRESSION_CONSTRAINT, "true"));
+
+        audioConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("googAutoGainControl2", "true"));
+        audioConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("googEchoCancellation2", "true"));
+        audioConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("googNoiseSuppression2", "true"));
+        audioConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("googTypingNoiseDetection", "true"));
+        audioConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("googAudioMirroring", "true"));
         return audioConstraints;
     }
 

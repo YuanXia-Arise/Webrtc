@@ -11,6 +11,7 @@
 package org.webrtc;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -320,6 +321,7 @@ class Camera1Session implements CameraSession {
       }
     });
   }
+
 
   private int getFrameOrientation() {
     int rotation = CameraSession.getDeviceOrientation(applicationContext);

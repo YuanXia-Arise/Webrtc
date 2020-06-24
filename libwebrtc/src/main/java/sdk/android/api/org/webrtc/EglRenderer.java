@@ -209,7 +209,10 @@ public class EglRenderer implements VideoSink {
       this.usePresentationTimeStamp = usePresentationTimeStamp;
 
       final HandlerThread renderThread = new HandlerThread(name + "EglRenderer");
-      renderThread.start();
+      try{
+        renderThread.start();
+      }catch (OutOfMemoryError e){}
+      //renderThread.start();
       renderThreadHandler =
           new HandlerWithExceptionCallback(renderThread.getLooper(), new Runnable() {
             @Override

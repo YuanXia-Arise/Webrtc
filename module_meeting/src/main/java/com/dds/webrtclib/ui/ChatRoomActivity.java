@@ -32,6 +32,7 @@ import com.dds.webrtclib.Util;
 import com.dds.webrtclib.WebRTCManager;
 import com.dds.webrtclib.bean.MemberBean;
 import com.dds.webrtclib.utils.PermissionUtil;
+import com.google.gson.Gson;
 import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.common.AbstractUVCCameraHandler;
@@ -126,7 +127,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 public void onPreviewResult(byte[] nv21Yuv) {
                     System.out.println("123==00");
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(50);
                         new Util().createFileWithByte(nv21Yuv, WIDTH, HEIGHT);
                         if (status == 0) {
                             startCall();

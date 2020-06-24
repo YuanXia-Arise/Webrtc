@@ -58,14 +58,13 @@ public class Util {
     public byte[] readFileToByteArray() {
         File file = new File(Environment.getExternalStorageDirectory() + fileName);
         if(!file.exists()) {
-            System.out.println("File doesn't exist!");
             return null;
         }
+        FileInputStream in = null;
         try {
-            FileInputStream in = new FileInputStream(file);
+            in = new FileInputStream(file);
             long inSize = in.getChannel().size(); // 判断FileInputStream中是否有内容
             if (inSize == 0) {
-                System.out.println("The FileInputStream has no content!");
                 return null;
             }
 

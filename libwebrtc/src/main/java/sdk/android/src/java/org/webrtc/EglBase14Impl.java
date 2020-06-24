@@ -21,6 +21,8 @@ import android.opengl.EGLSurface;
 import android.os.Build;
 import android.view.Surface;
 
+import com.google.gson.Gson;
+
 /**
  * Holds EGL state and utility methods for handling an EGL14 EGLContext, an EGLDisplay,
  * and an EGLSurface.
@@ -96,7 +98,7 @@ class EglBase14Impl implements EglBase14 {
       throw new RuntimeException("Already has an EGLSurface");
     }
     int[] surfaceAttribs = {EGL14.EGL_NONE};
-    eglSurface = EGL14.eglCreateWindowSurface(eglDisplay, eglConfig, surface, surfaceAttribs, 0);
+    eglSurface = EGL14.eglCreateWindowSurface(eglDisplay, eglConfig, surface, surfaceAttribs,0);
     if (eglSurface == EGL14.EGL_NO_SURFACE) {
       throw new RuntimeException(
           "Failed to create window surface: 0x" + Integer.toHexString(EGL14.eglGetError()));
@@ -155,7 +157,7 @@ class EglBase14Impl implements EglBase14 {
   }
 
   private void checkIsNotReleased() {
-    if (eglDisplay == EGL14.EGL_NO_DISPLAY || eglContext == EGL14.EGL_NO_CONTEXT
+    if (eglDisplay == null || eglContext == null
         || eglConfig == null) {
       throw new RuntimeException("This object has been released");
     }
@@ -272,8 +274,7 @@ class EglBase14Impl implements EglBase14 {
       eglContext = EGL14.eglCreateContext(eglDisplay, eglConfig, rootContext, contextAttributes, 0);
     }
     if (eglContext == EGL14.EGL_NO_CONTEXT) {
-      throw new RuntimeException(
-          "Failed to create EGL context: 0x" + Integer.toHexString(EGL14.eglGetError()));
+      //throw new RuntimeException("Failed to create EGL context: 0x" + Integer.toHexString(EGL14.eglGetError()));
     }
     return eglContext;
   }

@@ -210,7 +210,7 @@ class HardwareVideoEncoder implements VideoEncoder {
       }
       Logging.d(TAG, "Format: " + format);
       codec.configure(
-          format, null /* surface */, null /* crypto */, MediaCodec.CONFIGURE_FLAG_ENCODE);
+          format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 
       if (useSurfaceMode) {
         textureEglBase = EglBase.createEgl14(sharedContext, EglBase.CONFIG_RECORDABLE);
