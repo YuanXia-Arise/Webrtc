@@ -176,7 +176,6 @@ public class JavaWebSocket implements IWebSocket {
         String jsonString = object.toString();
         Log.d(TAG, "send-->" + jsonString);
         mWebSocketClient.send(jsonString);
-
     }
 
     public void sendIceCandidate(String socketId, IceCandidate iceCandidate) {
@@ -233,7 +232,6 @@ public class JavaWebSocket implements IWebSocket {
             String myId = (String) data.get("you");
             events.onJoinToRoom(connections, myId);
         }
-
     }
 
     // 自己已经在房间，有人进来
@@ -244,7 +242,6 @@ public class JavaWebSocket implements IWebSocket {
             socketId = (String) data.get("socketId");
             events.onRemoteJoinToRoom(socketId);
         }
-
     }
 
     // 处理交换信息
@@ -260,8 +257,6 @@ public class JavaWebSocket implements IWebSocket {
             IceCandidate iceCandidate = new IceCandidate(sdpMid, label, candidate);
             events.onRemoteIceCandidate(socketId, iceCandidate);
         }
-
-
     }
 
     // 有人离开了房间

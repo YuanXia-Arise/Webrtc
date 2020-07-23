@@ -51,7 +51,6 @@ public class WebRTCManager implements ISignalingEvents {
         this._wss = wss;
         this._iceServers = iceServers;
         _connectEvent = event;
-
     }
 
     // connect
@@ -63,13 +62,11 @@ public class WebRTCManager implements ISignalingEvents {
             _webSocket = new JavaWebSocket(this);
             _webSocket.connect(_wss);
             _peerHelper = new PeerConnectionHelper(_webSocket, _iceServers);
-        } else {
-            // 正在通话中
+        } else { // 正在通话中
             _webSocket.close();
             _webSocket = null;
             _peerHelper = null;
         }
-
     }
 
 
@@ -87,7 +84,6 @@ public class WebRTCManager implements ISignalingEvents {
         if (_webSocket != null) {
             _webSocket.joinRoom(_roomId);
         }
-
     }
 
     public void switchCamera() {
@@ -122,9 +118,7 @@ public class WebRTCManager implements ISignalingEvents {
             if (_connectEvent != null) {
                 _connectEvent.onSuccess();
             }
-
         });
-
     }
 
     @Override
@@ -138,7 +132,6 @@ public class WebRTCManager implements ISignalingEvents {
                 }
             }
         });
-
     }
 
     @Override
@@ -151,7 +144,6 @@ public class WebRTCManager implements ISignalingEvents {
                 }
             }
         });
-
     }
 
     @Override
@@ -159,10 +151,8 @@ public class WebRTCManager implements ISignalingEvents {
         handler.post(() -> {
             if (_peerHelper != null) {
                 _peerHelper.onRemoteJoinToRoom(socketId);
-
             }
         });
-
     }
 
     @Override
@@ -172,7 +162,6 @@ public class WebRTCManager implements ISignalingEvents {
                 _peerHelper.onRemoteIceCandidate(socketId, iceCandidate);
             }
         });
-
     }
 
     @Override
@@ -182,7 +171,6 @@ public class WebRTCManager implements ISignalingEvents {
                 _peerHelper.onRemoteIceCandidateRemove(socketId, iceCandidates);
             }
         });
-
     }
 
     @Override
@@ -192,7 +180,6 @@ public class WebRTCManager implements ISignalingEvents {
                 _peerHelper.onRemoteOutRoom(socketId);
             }
         });
-
     }
 
     @Override
@@ -202,7 +189,6 @@ public class WebRTCManager implements ISignalingEvents {
                 _peerHelper.onReceiveOffer(socketId, sdp);
             }
         });
-
     }
 
     @Override
@@ -212,8 +198,6 @@ public class WebRTCManager implements ISignalingEvents {
                 _peerHelper.onReceiverAnswer(socketId, sdp);
             }
         });
-
     }
-
 
 }

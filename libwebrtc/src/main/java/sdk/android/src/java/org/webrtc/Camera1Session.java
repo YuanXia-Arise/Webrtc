@@ -128,7 +128,11 @@ class Camera1Session implements CameraSession {
     parameters.setPreviewFpsRange(captureFormat.framerate.min, captureFormat.framerate.max);
     parameters.setPreviewSize(captureFormat.width, captureFormat.height);
     parameters.setPictureSize(pictureSize.width, pictureSize.height);
-    parameters.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
+    if (PrefSingleton.getInstance().getBoolean("flow_mode")) {
+      parameters.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
+    } else {
+    }
+    //parameters.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
     if (!captureToTexture) {
       parameters.setPreviewFormat(captureFormat.imageFormat);
     }

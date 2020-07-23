@@ -299,6 +299,7 @@ class HardwareVideoEncoder implements VideoEncoder {
     }
 
     if (outputBuilders.size() > MAX_ENCODER_Q_SIZE) {
+      Logging.e(TAG, String.valueOf(outputBuilders.size()));
       // Too many frames in the encoder.  Drop this frame.
       Logging.e(TAG, "Dropped frame, encoder queue full");
       return VideoCodecStatus.NO_OUTPUT; // See webrtc bug 2887.
@@ -350,8 +351,8 @@ class HardwareVideoEncoder implements VideoEncoder {
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
       // It is not necessary to release this frame because it doesn't own the buffer.
       VideoFrame derotatedFrame =
-          new VideoFrame(videoFrame.getBuffer(), 0 /* rotation */, videoFrame.getTimestampNs());
-      videoFrameDrawer.drawFrame(derotatedFrame, textureDrawer, null /* additionalRenderMatrix */);
+          new VideoFrame(videoFrame.getBuffer(), 0, videoFrame.getTimestampNs());
+      videoFrameDrawer.drawFrame(derotatedFrame, textureDrawer, null);
       textureEglBase.swapBuffers(videoFrame.getTimestampNs());
     } catch (RuntimeException e) {
       Logging.e(TAG, "encodeTexture failed", e);
@@ -369,7 +370,7 @@ class HardwareVideoEncoder implements VideoEncoder {
     // No timeout.  Don't block for an input buffer, drop frames if the encoder falls behind.
     int index;
     try {
-      index = codec.dequeueInputBuffer(0 /* timeout */);
+      index = codec.dequeueInputBuffer(0);
     } catch (IllegalStateException e) {
       Logging.e(TAG, "dequeueInputBuffer failed", e);
       return VideoCodecStatus.ERROR;
@@ -391,8 +392,7 @@ class HardwareVideoEncoder implements VideoEncoder {
     fillInputBuffer(buffer, videoFrameBuffer);
 
     try {
-      codec.queueInputBuffer(
-          index, 0 /* offset */, bufferSize, presentationTimestampUs, 0 /* flags */);
+      codec.queueInputBuffer(index, 0, bufferSize, presentationTimestampUs, 0);
     } catch (IllegalStateException e) {
       Logging.e(TAG, "queueInputBuffer failed", e);
       // IllegalStateException thrown when the codec is in the wrong state.
@@ -454,7 +454,7 @@ class HardwareVideoEncoder implements VideoEncoder {
     encodeThreadChecker.checkIsOnValidThread();
     // Ideally MediaCodec would honor BUFFER_FLAG_SYNC_FRAME so we could
     // indicate this in queueInputBuffer() below and guarantee _this_ frame
-    // be encoded as a key frame, but sadly that flag is ignored.  Instead,
+    // be encoded as a key frame, but sadly that flag is ignored. Instead,
     // we request a key frame "soon".
     try {
       Bundle b = new Bundle();
@@ -510,8 +510,7 @@ class HardwareVideoEncoder implements VideoEncoder {
 
         final ByteBuffer frameBuffer;
         if (isKeyFrame && codecType == VideoCodecType.H264) {
-          Logging.d(TAG,
-              "Prepending config frame of size " + configBuffer.capacity()
+          Logging.d(TAG,"Prepending config frame of size " + configBuffer.capacity()
                   + " to output buffer with offset " + info.offset + ", size " + info.size);
           // For H.264 key frame prepend SPS and PPS NALs at the start.
           frameBuffer = ByteBuffer.allocateDirect(info.size + configBuffer.capacity());

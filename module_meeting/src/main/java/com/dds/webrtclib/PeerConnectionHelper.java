@@ -63,7 +63,7 @@ public class PeerConnectionHelper {
 
     public int VIDEO_RESOLUTION_WIDTH = 1920;
     public int VIDEO_RESOLUTION_HEIGHT = 1080;
-    public static final int FPS = 10;
+    public static final int FPS = 60;
     public static final String VIDEO_CODEC_H264 = "H264";
     public static final String VIDEO_TRACK_ID = "ARDAMSv0";
     public static final String AUDIO_TRACK_ID = "ARDAMSa0";
@@ -267,7 +267,8 @@ public class PeerConnectionHelper {
             if (video_type == 1) { // 视频源1 本地摄像头
                 captureAndroid = createVideoCapture();
                 surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
-                videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
+                //videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
+                videoSource = _factory.createVideoSource(true);
                 captureAndroid.initialize(surfaceTextureHelper, _context, videoSource.getCapturerObserver());
                 captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
                 _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
@@ -276,8 +277,8 @@ public class PeerConnectionHelper {
                 if (viewCallback != null) {
                     viewCallback.onSetLocalStream(_localStream, _myId);
                 }
-            } else if (video_type == 2) { // 视频源2 USB采集卡
-                videoSource = _factory.createVideoSource(false);
+            } else if (video_type == 2) { // 视频源2 USB视频采集卡
+                videoSource = _factory.createVideoSource(true);
                 new Thread_USB().start();
             }
         }
@@ -294,7 +295,7 @@ public class PeerConnectionHelper {
             while (Usb_Camera){
                 try {
                     Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
-                    Thread.sleep(100);
+                    Thread.sleep(50);
                     byte[] bytes = new Util().readFileToByteArray();
                     ByteBuffer frame = ByteBuffer.wrap(bytes);
                     System.out.println("123==1");
@@ -313,13 +314,11 @@ public class PeerConnectionHelper {
                         imageArrayLock.unlock();
                         _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
                         videoSource.dispose();
-
                         _localStream.addTrack(_localVideoTrack);
 
                         if (viewCallback != null) {
                             viewCallback.onSetLocalStream(_localStream, _myId);
                         }
-
                     }
                 } catch (NullPointerException e) {
 
@@ -330,23 +329,6 @@ public class PeerConnectionHelper {
                 }
             }
         }
-    }
-
-    public static byte[] nv21ToI420(byte[] data, int width, int height) {
-        byte[] ret = new byte[data.length];
-        int total = width * height;
-
-        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);
-        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4);
-        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4);
-
-        bufferY.put(data, 0, total);
-        for (int i=total; i<data.length; i+=2) {
-            bufferV.put(data[i]);
-            bufferU.put(data[i+1]);
-        }
-
-        return ret;
     }
 
 
@@ -400,6 +382,7 @@ public class PeerConnectionHelper {
 
 
     //**************************************逻辑控制**************************************
+
     // 调整摄像头前置后置
     public void switchCamera() {
         if (captureAndroid == null) return;
@@ -409,7 +392,6 @@ public class PeerConnectionHelper {
         } else {
             Log.d(TAG, "Will not switch camera, video caputurer is not a camera");
         }
-
     }
 
     // 设置自己静音
@@ -419,11 +401,11 @@ public class PeerConnectionHelper {
         }
     }
 
+    // 设置免提
     public void toggleSpeaker(boolean enable) {
         if (mAudioManager != null) {
             mAudioManager.setSpeakerphoneOn(enable);
         }
-
     }
 
     // 退出房间
@@ -465,7 +447,6 @@ public class PeerConnectionHelper {
                 surfaceTextureHelper = null;
             }
 
-
             if (_factory != null) {
                 _factory.dispose();
                 _factory = null;
@@ -481,13 +462,14 @@ public class PeerConnectionHelper {
 
     private VideoCapturer createVideoCapture() {
         VideoCapturer videoCapturer;
-        if (useCamera2()) {
+        /*if (useCamera2()) {
             System.out.println("3333==0");
             videoCapturer = createCameraCapture(new Camera2Enumerator(_context));
         } else {
             System.out.println("3333==1");
             videoCapturer = createCameraCapture(new Camera1Enumerator(true));
-        }
+        }*/
+        videoCapturer = createCameraCapture(new Camera1Enumerator(true));
         return videoCapturer;
     }
 
@@ -550,6 +532,9 @@ public class PeerConnectionHelper {
                 new MediaConstraints.KeyValuePair("googTypingNoiseDetection", "true"));
         audioConstraints.mandatory.add(
                 new MediaConstraints.KeyValuePair("googAudioMirroring", "true"));
+
+        audioConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("googCpuOveruseDetection", "false"));
         return audioConstraints;
     }
 
@@ -836,6 +821,26 @@ public class PeerConnectionHelper {
                 height_usb = 960;
                 break;
         }
+    }
+
+    public static byte[] nv21ToI420(byte[] data, int width, int height) {
+        byte[] ret = new byte[data.length];
+        int total = width * height;
+
+        ByteBuffer bufferY = ByteBuffer.wrap(ret, 0, total);
+        ByteBuffer bufferU = ByteBuffer.wrap(ret, total, total / 4);
+        ByteBuffer bufferV = ByteBuffer.wrap(ret, total + total / 4, total / 4);
+
+        bufferY.put(data, 0, total);
+
+        bufferU.put(data, total, total / 4);
+        bufferV.put(data,total + total / 4, total /4);
+
+        /*for (int i=total; i<data.length; i+=2) {
+            bufferV.put(data[i]);
+            bufferU.put(data[i+1]);
+        }*/
+        return ret;
     }
 
 }

@@ -517,9 +517,9 @@ public class PeerConnectionFactory {
   /** Deprecated, use non-static version instead. */
   @Deprecated
   public static void printStackTraces() {
-    printStackTrace(staticNetworkThread, /* printNativeStackTrace= */ false);
-    printStackTrace(staticWorkerThread, /* printNativeStackTrace= */ false);
-    printStackTrace(staticSignalingThread, /* printNativeStackTrace= */ false);
+    printStackTrace(staticNetworkThread, false);
+    printStackTrace(staticWorkerThread, false);
+    printStackTrace(staticSignalingThread, false);
   }
 
   /**

@@ -30,12 +30,9 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
-    <!--android:vmSafeMode="true" 虚拟机运行在安全模式下
-        android:allowClearUserData="true" 应用重置用户数据 false
-        android:hardwareAccelerated="true" Activity和View进行硬件加速渲染-->
 
     <application
-        android:name="org.App"
+        android:name="org.activity.App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -44,7 +41,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="org.LauncherActivity"
+            android:name="org.activity.LauncherActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleInstance"
@@ -65,38 +62,11 @@
             <!--USB END-->
         </activity>
 
-        <activity android:name="org.SetupActivity"
+        <activity android:name="org.activity.SetupActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"/>
 
-        <!-- ======================java====================== -->
-        <activity
-            android:name="org.java.voip.CallSingleActivity"
-            android:vmSafeMode="true"
-            android:hardwareAccelerated="true"
-            android:screenOrientation="portrait"
-            android:showOnLockScreen="true"
-            android:showWhenLocked="true"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="${applicationId}.kit.voip.single" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <receiver android:name="org.java.voip.VoipReceiver">
-            <intent-filter>
-                <action android:name="${applicationId}.voip.Receiver" />
-            </intent-filter>
-        </receiver>
-
-        <!--悬浮窗-->
-        <service
-            android:name="org.java.voip.FloatingVoipService"
-            android:enabled="true"
-            android:exported="true" />
 
     </application>
 

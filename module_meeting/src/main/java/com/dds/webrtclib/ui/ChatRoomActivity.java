@@ -5,22 +5,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.dds.libusbcamera.UVCCameraHelper;
 import com.dds.libusbcamera.utils.FileUtils;
@@ -32,7 +27,6 @@ import com.dds.webrtclib.Util;
 import com.dds.webrtclib.WebRTCManager;
 import com.dds.webrtclib.bean.MemberBean;
 import com.dds.webrtclib.utils.PermissionUtil;
-import com.google.gson.Gson;
 import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.common.AbstractUVCCameraHandler;
@@ -52,7 +46,6 @@ import java.util.Map;
 
 /**
  * 群聊界面
- * 支持 9 路同時通信
  */
 public class ChatRoomActivity extends AppCompatActivity implements IViewCallback, CameraViewInterface.Callback, CameraDialog.CameraDialogParent {
 
@@ -80,6 +73,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); // 全屏
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wr_activity_chat_room);
         initView();
@@ -127,7 +121,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 public void onPreviewResult(byte[] nv21Yuv) {
                     System.out.println("123==00");
                     try {
-                        Thread.sleep(50);
+                        Thread.sleep(0);
                         new Util().createFileWithByte(nv21Yuv, WIDTH, HEIGHT);
                         if (status == 0) {
                             startCall();
@@ -141,7 +135,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 }
             });
         }
-
     }
 
     private void startCall() {
@@ -335,7 +328,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 isPreview = false;
             } else {
                 isPreview = true;
-                new Thread(new Runnable() {
+                /*new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -349,13 +342,14 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                         }
                         Looper.loop();
                     }
-                }).start();
+                }).start();*/
             }
         }
 
         @Override
         public void onDisConnectDev(UsbDevice device) {
-            return;
+            PrefSingleton.getInstance().putBoolean("USB_Camera",false);
+            finish();
         }
     };
 

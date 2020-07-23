@@ -3,12 +3,15 @@ package com.dds.webrtclib;
 import android.graphics.Bitmap;
 import android.os.Environment;
 
+import org.webrtc.PrefSingleton;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import static androidx.core.math.MathUtils.clamp;
 import static java.lang.System.in;
@@ -31,8 +34,14 @@ public class Util {
             file.createNewFile();
             outputStream = new FileOutputStream(file); // 获取FileOutputStream对象
             bufferedOutputStream = new BufferedOutputStream(outputStream); // 获取BufferedOutputStream对象
+
+            if (PrefSingleton.getInstance().getBoolean("flow_mode")) {
+                bufferedOutputStream.write(fetchNV21(createBitmap(bytes, width, height)));
+            } else {
+                bufferedOutputStream.write(bytes);
+            }
             //bufferedOutputStream.write(bytes); // 往文件所在的缓冲输出流中写byte数据
-            bufferedOutputStream.write(fetchNV21(createBitmap(bytes, width, height)));
+            //bufferedOutputStream.write(fetchNV21(createBitmap(bytes, width, height)));
             bufferedOutputStream.flush(); // 刷新缓冲流
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,7 +128,7 @@ public class Util {
                 int yIndex = i * w + j;
 
                 int argb = pixels[yIndex];
-                int a = (argb >> 24) & 0xff;  // unused
+                int a = (argb >> 24) & 0xff;
                 int r = (argb >> 16) & 0xff;
                 int g = (argb >> 8) & 0xff;
                 int b = argb & 0xff;
@@ -142,5 +151,6 @@ public class Util {
         }
         return nv21;
     }
+
 
 }
