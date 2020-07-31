@@ -63,7 +63,7 @@ public class PeerConnectionHelper {
 
     public int VIDEO_RESOLUTION_WIDTH = 1920;
     public int VIDEO_RESOLUTION_HEIGHT = 1080;
-    public static final int FPS = 60;
+    public static final int FPS = 30;
     public static final String VIDEO_CODEC_H264 = "H264";
     public static final String VIDEO_TRACK_ID = "ARDAMSv0";
     public static final String AUDIO_TRACK_ID = "ARDAMSa0";
@@ -295,7 +295,6 @@ public class PeerConnectionHelper {
             while (Usb_Camera){
                 try {
                     Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
-                    Thread.sleep(50);
                     byte[] bytes = new Util().readFileToByteArray();
                     ByteBuffer frame = ByteBuffer.wrap(bytes);
                     System.out.println("123==1");
@@ -321,8 +320,6 @@ public class PeerConnectionHelper {
                         }
                     }
                 } catch (NullPointerException e) {
-
-                } catch (InterruptedException e) {
 
                 } catch (Exception e) {
 
@@ -469,7 +466,7 @@ public class PeerConnectionHelper {
             System.out.println("3333==1");
             videoCapturer = createCameraCapture(new Camera1Enumerator(true));
         }*/
-        videoCapturer = createCameraCapture(new Camera1Enumerator(true));
+        videoCapturer = createCameraCapture(new Camera1Enumerator(false));
         return videoCapturer;
     }
 
@@ -823,6 +820,8 @@ public class PeerConnectionHelper {
         }
     }
 
+
+    //视频帧转换
     public static byte[] nv21ToI420(byte[] data, int width, int height) {
         byte[] ret = new byte[data.length];
         int total = width * height;
@@ -836,7 +835,7 @@ public class PeerConnectionHelper {
         bufferU.put(data, total, total / 4);
         bufferV.put(data,total + total / 4, total /4);
 
-        /*for (int i=total; i<data.length; i+=2) {
+        /*for (int i = total; i < data.length; i+=2) {
             bufferV.put(data[i]);
             bufferU.put(data[i+1]);
         }*/

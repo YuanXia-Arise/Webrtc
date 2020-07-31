@@ -101,12 +101,6 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
         Permission(); // 动态权限
         CH34x(); // 配置ch34x参数
 
-        /*try {
-            client.connectBlocking(); //web_socket连接
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
     }
 
     // 动态权限申请
@@ -225,7 +219,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
             case R.id.settings: // 设置
                 startActivity(new Intent(this, SetupActivity.class));
                 break;
-            case R.id.Calling: // 拨打
+            case R.id.Calling: // 视频
                 onCall();
                 break;
             default:

@@ -118,17 +118,13 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
             mCameraHelper.initUSBMonitor(this, mUVCCameraView, listener, WIDTH, HEIGHT);
             mCameraHelper.setOnPreviewFrameListener(new AbstractUVCCameraHandler.OnPreViewResultListener() {
                 @Override
-                public void onPreviewResult(byte[] nv21Yuv) {
-                    System.out.println("123==00");
+                public void onPreviewResult(byte[] nv21Yuv) { // UVC回调帧数据
                     try {
-                        Thread.sleep(0);
                         new Util().createFileWithByte(nv21Yuv, WIDTH, HEIGHT);
                         if (status == 0) {
                             startCall();
                             status = 1;
                         }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -143,7 +139,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         if (!PermissionUtil.isNeedRequestPermission(ChatRoomActivity.this)) {
             manager.joinRoom(getApplicationContext(), rootEglBase);
         }
-
     }
 
     @Override
@@ -162,8 +157,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         /*runOnUiThread(() -> {
             addView(userId, stream);
         });*/
-
-
     }
 
     @Override
@@ -185,7 +178,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         if (stream.videoTracks.size() > 0) {
             stream.videoTracks.get(0).addSink(sink);
         }
-
         wr_video_view.addView(renderer);
     }
 
@@ -257,7 +249,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         if (_localVideoTrack != null) {
             _localVideoTrack.setEnabled(enableCamera);
         }
-
     }
 
     private void exit() {
@@ -288,8 +279,9 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         manager.joinRoom(getApplicationContext(), rootEglBase);
     }
 
+
     /**
-     * 集成UVC采集视频
+     * 集成UVC视频采集
      */
     public View mTextureView;
     private UVCCameraHelper mCameraHelper;
@@ -297,7 +289,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
     private boolean isRequest;
     private boolean isPreview;
 
-    private int video_type = 0;
+    private int video_type = 0; // 视频源(1,2)
     private int status = 0;
 
     private UVCCameraHelper.OnMyDevConnectListener listener = new UVCCameraHelper.OnMyDevConnectListener() {
@@ -328,21 +320,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 isPreview = false;
             } else {
                 isPreview = true;
-                /*new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Looper.prepare();
-                        if(mCameraHelper != null && mCameraHelper.isCameraOpened()) {
-
-                        }
-                        Looper.loop();
-                    }
-                }).start();*/
             }
         }
 

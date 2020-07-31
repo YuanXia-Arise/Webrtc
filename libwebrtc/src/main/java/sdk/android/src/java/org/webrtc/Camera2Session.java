@@ -22,11 +22,16 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
+import android.os.Build;
 import android.os.Handler;
 
 import android.util.Log;
 import android.util.Range;
 import android.view.Surface;
+
+import androidx.annotation.RequiresApi;
 
 import com.google.gson.Gson;
 
@@ -173,11 +178,20 @@ class Camera2Session implements CameraSession {
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
             new Range<Integer>(captureFormat.framerate.min / fpsUnitFactor,
                 captureFormat.framerate.max / fpsUnitFactor));
+
+        //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);//设置自动聚焦
+        //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH); //设置自动曝光
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
         //captureRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, (float)99.0);
         //captureRequestBuilder.set(CaptureRequest.LENS_FOCAL_LENGTH, (float) 99.0f);
-        captureRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE,CaptureRequest.CONTROL_EFFECT_MODE_MONO);
+        if (PrefSingleton.getInstance().getBoolean("flow_mode")) {
+          //captureRequestBuilder.set(CaptureRequest.CONTROL_MODE,CaptureRequest.CONTROL_AE_MODE_ON);
+          captureRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE,CaptureRequest.CONTROL_EFFECT_MODE_MONO);
+          //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE,CaptureRequest.CONTROL_AWB_MODE_SHADE);
+        } else {
+        }
+
         chooseStabilizationMode(captureRequestBuilder);
         chooseFocusMode(captureRequestBuilder);
 
@@ -311,6 +325,9 @@ class Camera2Session implements CameraSession {
 
     try {
       cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+      //System.out.println("876876:" + cameraCharacteristics.getAvailableCaptureRequestKeys().toString());
+      //int[] available = cameraCharacteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS);
+      //System.out.println("777777:" + new Gson().toJson(available));
     } catch (final CameraAccessException e) {
       reportError("getCameraCharacteristics(): " + e.getMessage());
       return;
@@ -349,6 +366,7 @@ class Camera2Session implements CameraSession {
     captureFormat = new CaptureFormat(bestSize.width, bestSize.height, bestFpsRange);
     Logging.d(TAG, "Using capture format: " + captureFormat);
   }
+
 
   @SuppressLint("MissingPermission")
   private void openCamera() {

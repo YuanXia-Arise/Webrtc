@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.versionCompiler
     defaultConfig {
         applicationId "com.webrtc"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion rootProject.ext.versionTarget
         versionCode 1
-        versionName "1.1.3" //20200624
+        versionName "1.1.4" //20200731
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_8
             targetCompatibility JavaVersion.VERSION_1_8

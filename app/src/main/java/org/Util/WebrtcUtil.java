@@ -16,8 +16,6 @@ import com.dds.webrtclib.ws.IConnectEvent;
  */
 public class WebrtcUtil {
 
-
-    //public static final String HOST = "47.93.186.97";
     public static final String HOST = "139.224.12.24";
 
     // turn and stun
@@ -32,7 +30,6 @@ public class WebrtcUtil {
 
     // signalling
     private static String WSS = "wss://139.224.12.24/wss"; // 默认IP地址
-
 
     // one to one
     public static void callSingle(Activity activity, String wss, String roomId, boolean videoEnable) {

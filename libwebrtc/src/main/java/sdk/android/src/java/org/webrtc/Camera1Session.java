@@ -10,23 +10,58 @@
 
 package org.webrtc;
 
+import android.app.ActivityManager;
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.ImageFormat;
+import android.graphics.Paint;
+import android.graphics.Picture;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.Preference;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.renderscript.Type;
 import android.util.Log;
 
 import com.google.gson.Gson;
 
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.Policy;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static androidx.core.math.MathUtils.clamp;
 
 //import com.serenegiant.usb.UVCCamera;
 @SuppressWarnings("deprecation")
@@ -128,6 +163,7 @@ class Camera1Session implements CameraSession {
     parameters.setPreviewFpsRange(captureFormat.framerate.min, captureFormat.framerate.max);
     parameters.setPreviewSize(captureFormat.width, captureFormat.height);
     parameters.setPictureSize(pictureSize.width, pictureSize.height);
+
     if (PrefSingleton.getInstance().getBoolean("flow_mode")) {
       parameters.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
     } else {
@@ -313,17 +349,94 @@ class Camera1Session implements CameraSession {
           firstFrameReported = true;
         }
 
+
         VideoFrame.Buffer frameBuffer = new NV21Buffer(
-            data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
-              if (state == SessionState.RUNNING) {
-                camera.addCallbackBuffer(data);
-              }
-            }));
+                data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
+          if (state == SessionState.RUNNING) {
+            camera.addCallbackBuffer(data);
+          }
+        }));
         final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
         events.onFrameCaptured(Camera1Session.this, frame);
         frame.release();
+
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && PrefSingleton.getInstance().getBoolean("flow_mode")){
+          byte[] Data = fetchNV21(createBitmap(data, captureFormat.width, captureFormat.height));
+          VideoFrame.Buffer frameBuffer = new NV21Buffer(
+                  Data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
+            if (state == SessionState.RUNNING) {
+              camera.addCallbackBuffer(Data);
+            }
+          }));
+          final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
+          events.onFrameCaptured(Camera1Session.this, frame);
+          frame.release();
+        } else {
+
+        VideoFrame.Buffer frameBuffer = new NV21Buffer(
+                data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
+          if (state == SessionState.RUNNING) {
+            camera.addCallbackBuffer(data);
+          }
+        }));
+        final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
+        events.onFrameCaptured(Camera1Session.this, frame);
+        frame.release();}*/
       }
     });
+  }
+
+
+  //20200730
+  public static Bitmap createBitmap(byte[] values, int picW, int picH) {
+    if(values == null || picW <= 0 || picH <= 0)
+      return null;
+    Bitmap bitmap = Bitmap.createBitmap(picW, picH, Bitmap.Config.ARGB_8888);
+    int pixels[] = new int[picW * picH];
+    for (int i = 0; i < pixels.length; ++i) {
+      pixels[i] = values[i] * 256 * 256 + values[i] * 256 + values[i] + 0xFF000000;
+    }
+    bitmap.setPixels(pixels, 0, picW, 0, 0, picW, picH);
+    values = null;
+    pixels = null;
+    return bitmap;
+  }
+  public byte[] fetchNV21(Bitmap bitmap) {
+    int w = bitmap.getWidth();
+    int h = bitmap.getHeight();
+    int size = w * h;
+    int[] pixels = new int[size];
+    bitmap.getPixels(pixels,0, w,0,0, w, h);
+    byte[] nv21 = new byte[size * 3 / 2];
+    w &= ~1;
+    h &= ~1;
+    for (int i = 0; i < h; i++) {
+      for (int j = 0; j < w; j++) {
+        int yIndex = i * w + j;
+
+        int argb = pixels[yIndex];
+        int a = (argb >> 24) & 0xff;
+        int r = (argb >> 16) & 0xff;
+        int g = (argb >> 8) & 0xff;
+        int b = argb & 0xff;
+
+        int y = ((66 * r + 129 * g + 25 * b + 128) >> 8) + 16;
+        y = clamp(y, 16, 255);
+        nv21[yIndex] = (byte)y;
+
+        if (i % 2 == 0 && j % 2 == 0) {
+          int u = ((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128;
+          int v = ((112 * r - 94 * g -18 * b + 128) >> 8) + 128;
+
+          u = clamp(u, 0, 255);
+          v = clamp(v, 0, 255);
+
+          nv21[size + i / 2 * w + j] = (byte) v;
+          nv21[size + i / 2 * w + j + 1] = (byte) u;
+        }
+      }
+    }
+    return nv21;
   }
 
 
@@ -340,6 +453,5 @@ class Camera1Session implements CameraSession {
       throw new IllegalStateException("Wrong thread");
     }
   }
-
 
 }

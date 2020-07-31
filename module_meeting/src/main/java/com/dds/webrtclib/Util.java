@@ -20,11 +20,10 @@ public class Util {
 
     private String fileName = "/byte.txt";
 
+    //write
     public void createFileWithByte(byte[] bytes, int width, int height) {
         // TODO Auto-generated method stub
-
         File file = new File(Environment.getExternalStorageDirectory() + fileName);
-
         FileOutputStream outputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
         try {
