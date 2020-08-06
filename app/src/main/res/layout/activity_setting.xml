@@ -69,7 +69,7 @@
             android:background="@drawable/button_off"
             android:text="1080x1920"
             android:textSize="16sp"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"/>
 
         <Button
             android:id="@+id/resolv_two"

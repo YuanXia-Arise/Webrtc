@@ -164,7 +164,8 @@ class Camera1Session implements CameraSession {
     parameters.setPreviewSize(captureFormat.width, captureFormat.height);
     parameters.setPictureSize(pictureSize.width, pictureSize.height);
 
-    if (PrefSingleton.getInstance().getBoolean("flow_mode")) {
+    if (PrefSingleton.getInstance().getBoolean("flow_mode")
+            && Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
       parameters.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
     } else {
     }
@@ -349,73 +350,56 @@ class Camera1Session implements CameraSession {
           firstFrameReported = true;
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+                PrefSingleton.getInstance().getBoolean("flow_mode")){
+          //byte[] Data = fetchNV21(createBitmap(data, captureFormat.width, captureFormat.height));
+          byte[] Data = fetch(btoi(data, captureFormat.width, captureFormat.height),captureFormat.width, captureFormat.height);
+          VideoFrame.Buffer frameBuffer = new NV21Buffer(Data, captureFormat.width,captureFormat.height,null);
+          final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
+          events.onFrameCaptured(Camera1Session.this, frame);
+          frame.release();
 
-        VideoFrame.Buffer frameBuffer = new NV21Buffer(
-                data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
           if (state == SessionState.RUNNING) {
             camera.addCallbackBuffer(data);
           }
-        }));
-        final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
-        events.onFrameCaptured(Camera1Session.this, frame);
-        frame.release();
-
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && PrefSingleton.getInstance().getBoolean("flow_mode")){
-          byte[] Data = fetchNV21(createBitmap(data, captureFormat.width, captureFormat.height));
+        } else {
           VideoFrame.Buffer frameBuffer = new NV21Buffer(
-                  Data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
+                  data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
             if (state == SessionState.RUNNING) {
-              camera.addCallbackBuffer(Data);
+              camera.addCallbackBuffer(data);
             }
           }));
           final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
           events.onFrameCaptured(Camera1Session.this, frame);
           frame.release();
-        } else {
-
-        VideoFrame.Buffer frameBuffer = new NV21Buffer(
-                data, captureFormat.width, captureFormat.height, () -> cameraThreadHandler.post(() -> {
-          if (state == SessionState.RUNNING) {
-            camera.addCallbackBuffer(data);
-          }
-        }));
-        final VideoFrame frame = new VideoFrame(frameBuffer, getFrameOrientation(), captureTimeNs);
-        events.onFrameCaptured(Camera1Session.this, frame);
-        frame.release();}*/
+        }
       }
     });
   }
 
-
-  //20200730
-  public static Bitmap createBitmap(byte[] values, int picW, int picH) {
-    if(values == null || picW <= 0 || picH <= 0)
-      return null;
-    Bitmap bitmap = Bitmap.createBitmap(picW, picH, Bitmap.Config.ARGB_8888);
-    int pixels[] = new int[picW * picH];
-    for (int i = 0; i < pixels.length; ++i) {
-      pixels[i] = values[i] * 256 * 256 + values[i] * 256 + values[i] + 0xFF000000;
-    }
-    bitmap.setPixels(pixels, 0, picW, 0, 0, picW, picH);
-    values = null;
-    pixels = null;
-    return bitmap;
+  //Android P data YUV 灰度处理 20200804
+  public static int[] btoi(byte[] values, int picW, int picH){
+      if (values == null || picW <= 0 || picH <= 0)
+          return null;
+      int pixels[] = new int[picW * picH];
+      int size = pixels.length;
+      for (int i = 0; i < size; i++) {
+          pixels[i] = values[i] * 256 * 256 + values[i] * 256 + values[i] + 0xFF000000;
+      }
+      return pixels;
   }
-  public byte[] fetchNV21(Bitmap bitmap) {
-    int w = bitmap.getWidth();
-    int h = bitmap.getHeight();
+
+  public byte[] fetch(int[] pixels, int w, int h) {
     int size = w * h;
-    int[] pixels = new int[size];
-    bitmap.getPixels(pixels,0, w,0,0, w, h);
+    Bitmap bitmap = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888);
+    bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
     byte[] nv21 = new byte[size * 3 / 2];
-    w &= ~1;
-    h &= ~1;
-    for (int i = 0; i < h; i++) {
-      for (int j = 0; j < w; j++) {
+    int i, j;
+    for (i = 0; i < h; i++) {
+      for (j = 0; j < w; j++) {
         int yIndex = i * w + j;
 
         int argb = pixels[yIndex];
-        int a = (argb >> 24) & 0xff;
         int r = (argb >> 16) & 0xff;
         int g = (argb >> 8) & 0xff;
         int b = argb & 0xff;
@@ -427,10 +411,8 @@ class Camera1Session implements CameraSession {
         if (i % 2 == 0 && j % 2 == 0) {
           int u = ((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128;
           int v = ((112 * r - 94 * g -18 * b + 128) >> 8) + 128;
-
           u = clamp(u, 0, 255);
           v = clamp(v, 0, 255);
-
           nv21[size + i / 2 * w + j] = (byte) v;
           nv21[size + i / 2 * w + j + 1] = (byte) u;
         }
@@ -452,6 +434,59 @@ class Camera1Session implements CameraSession {
     if (Thread.currentThread() != cameraThreadHandler.getLooper().getThread()) {
       throw new IllegalStateException("Wrong thread");
     }
+  }
+
+
+  //20200730
+  public static Bitmap createBitmap(byte[] values, int picW, int picH) {
+    if(values == null || picW <= 0 || picH <= 0)
+      return null;
+    Bitmap bitmap = Bitmap.createBitmap(picW, picH, Bitmap.Config.ARGB_8888);
+    int pixels[] = new int[picW * picH];
+    int size = pixels.length;
+    for (int i = 0; i < size; i++) {
+      pixels[i] = values[i] * 256 * 256 + values[i] * 256 + values[i] + 0xFF000000;
+    }
+    bitmap.setPixels(pixels, 0, picW, 0, 0, picW, picH);
+    //values = null;
+    //pixels = null;
+    return bitmap;
+  }
+
+  public byte[] fetchNV21(Bitmap bitmap) {
+    int w = bitmap.getWidth();
+    int h = bitmap.getHeight();
+    int size = w * h;
+    int[] pixels = new int[size];
+    bitmap.getPixels(pixels,0, w,0,0, w, h);
+    byte[] nv21 = new byte[size * 3 / 2];
+    //w &= ~1; h &= ~1;
+    int i, j;
+    for (i = 0; i < h; i++) {
+      for (j = 0; j < w; j++) {
+        int yIndex = i * w + j;
+
+        int argb = pixels[yIndex];
+        //int a = (argb >> 24) & 0xff;
+        int r = (argb >> 16) & 0xff;
+        int g = (argb >> 8) & 0xff;
+        int b = argb & 0xff;
+
+        int y = ((66 * r + 129 * g + 25 * b + 128) >> 8) + 16;
+        y = clamp(y, 16, 255);
+        nv21[yIndex] = (byte)y;
+
+        if (i % 2 == 0 && j % 2 == 0) {
+          int u = ((-38 * r - 74 * g + 112 * b + 128) >> 8) + 128;
+          int v = ((112 * r - 94 * g -18 * b + 128) >> 8) + 128;
+          u = clamp(u, 0, 255);
+          v = clamp(v, 0, 255);
+          nv21[size + i / 2 * w + j] = (byte) v;
+          nv21[size + i / 2 * w + j + 1] = (byte) u;
+        }
+      }
+    }
+    return nv21;
   }
 
 }

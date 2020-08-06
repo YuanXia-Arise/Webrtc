@@ -62,6 +62,7 @@ abstract class CameraCapturer implements CameraVideoCapturer {
                     }
                 }
 
+
                 @Override
                 public void onFailure(CameraSession.FailureType failureType, String error) {
                     checkIsOnCameraThread();

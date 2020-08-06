@@ -110,12 +110,10 @@ public class ChatSingleActivity extends AppCompatActivity implements CameraViewI
                 mCameraHelper.setOnPreviewFrameListener(new AbstractUVCCameraHandler.OnPreViewResultListener() {
                     @Override
                     public void onPreviewResult(byte[] nv21Yuv) {
-                        System.out.println("123==00");
                         try {
                             Thread.sleep(100);
                             new Util().createFileWithByte(nv21Yuv, WIDTH, HEIGHT);
                             if (status == 0) {
-                                System.out.println("123==2");
                                 startCall(); // one to one
                                 status = 1;
                             }

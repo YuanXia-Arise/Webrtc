@@ -332,7 +332,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
             if (retval == 0) {
                 retval = MyApp.driver.ResumeUsbList();
                 if (retval == -1) {
-                    Toast.makeText(getApplicationContext(), "Open failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "设备连接失败", Toast.LENGTH_SHORT).show();
                     MyApp.driver.CloseDevice();
                 } else if (retval == 0){
                     if (MyApp.driver.mDeviceConnection != null) {
@@ -340,10 +340,10 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
                             Toast.makeText(getApplicationContext(), "Initialization failed!", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        Toast.makeText(getApplicationContext(), "Device opened", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "设备连接", Toast.LENGTH_SHORT).show();
                         isOpen = true;
                     } else {
-                        Toast.makeText(getApplicationContext(), "Open failed!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "设备连接失败", Toast.LENGTH_SHORT).show();
                         return;
                     }
                 } else {
@@ -369,10 +369,13 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
                 try {
                     if (!client.isOpen()) {
                         client.connectBlocking(); // web_socket连接
+                        if (!client.isOpen()){
+                            Toast.makeText(getApplicationContext(), "服务器连接故障", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                } catch (IllegalStateException e){}
             }
         }
     }
@@ -381,7 +384,7 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
         if (isOpen) {
             isOpen = false;
             MyApp.driver.CloseDevice();
-            Toast.makeText(getApplicationContext(), "Device closed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "设备断开", Toast.LENGTH_SHORT).show();
         }
     }
 

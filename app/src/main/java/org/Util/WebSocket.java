@@ -34,11 +34,7 @@ public class WebSocket {
     public void send_data(String methon, int arg1, int arg2) {
         byte a1 = (byte) 0xf0; // 起始符
         byte a2 = 0x00;
-        byte x1;
-        byte x2;
-        byte y1;
-        byte y2;
-        byte a7;
+        byte x1,x2,y1,y2,a7;
         byte a8 = (byte) 0xff; // 结束符
         if (methon.equals("MouseMove")) {
             a2 = 0x01; // 指令
@@ -65,12 +61,7 @@ public class WebSocket {
 
     public void send_data_a(String methon, String arg1) {
         byte a1 = (byte) 0xf0; // 起始符
-        byte a2 = 0x00;
-        byte a3 = 0x00;
-        byte a4 = 0x00;
-        byte a5 = 0x00;
-        byte a6 = 0x00;
-        byte a7;
+        byte a2 = 0x00,a3 = 0x00,a4 = 0x00,a5 = 0x00,a6 = 0x00,a7;
         byte a8 = (byte) 0xff; // 结束符
 
         if (methon.equals("MouseUp")) {
@@ -119,40 +110,40 @@ public class WebSocket {
                 a = (byte) 0x90;
                 break;
             case "F1":
-                a = 0x11;
+                a = (byte) 0x11;
                 break;
             case "F2":
-                a = 0x12;
+                a = (byte) 0x12;
                 break;
             case "F3":
-                a = 0x13;
+                a = (byte) 0x13;
                 break;
             case "F4":
-                a = 0x14;
+                a = (byte) 0x14;
                 break;
             case "F5":
-                a = 0x15;
+                a = (byte) 0x15;
                 break;
             case "F6":
-                a = 0x16;
+                a = (byte) 0x16;
                 break;
             case "F7":
-                a = 0x17;
+                a = (byte) 0x17;
                 break;
             case "F8":
-                a = 0x18;
+                a = (byte) 0x18;
                 break;
             case "F9":
-                a = 0x19;
+                a = (byte) 0x19;
                 break;
             case "F10":
-                a = 0x1a;
+                a = (byte) 0x1a;
                 break;
             case "F11":
-                a = 0x1c;
+                a = (byte) 0x1c;
                 break;
             case "F12":
-                a = 0x1d;
+                a = (byte) 0x1d;
                 break;
             case "Home":
                 a = (byte) 0x91;
@@ -170,11 +161,10 @@ public class WebSocket {
                 a = (byte) 0x95;
                 break;
             case "CapsLock":
-                //a = (byte) 0x96;
-                a = 0x00;
+                a = (byte) 0x00;
                 break;
             case "Shift":
-                a = 0x10;
+                a = (byte) 0x10;
                 break;
             case "Control":
                 a = (byte) 0x97;
@@ -183,7 +173,7 @@ public class WebSocket {
                 a = (byte) 0x98;
                 break;
             case " ":
-                a = 0x20;
+                a = (byte) 0x20;
                 break;
             case "PageUp":
                 a = (byte) 0x99;
@@ -204,10 +194,9 @@ public class WebSocket {
                 a = (byte) 0x9c;
                 break;
             case "Enter":
-                a = 0x0a;
+                a = (byte) 0x0a;
                 break;
             case "Backspace":
-                //a = (byte) 0x08;
                 a = (byte) 0xa1;
                 break;
             case "{":
@@ -220,7 +209,7 @@ public class WebSocket {
                 a = (byte) 0x22;
                 break;
             case "\\":
-                a = 0x5c;
+                a = (byte) 0x5c;
                 break;
             default:
                 a = toByteArray(convertStringToHex(s))[0];

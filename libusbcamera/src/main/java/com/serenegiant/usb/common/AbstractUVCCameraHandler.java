@@ -227,9 +227,10 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     // while preview is still running.
                     // therefore this method will take a time to execute
                     try {
-                        thread.mSync.wait();
+                        //thread.mSync.wait();
+                        thread.mSync.wait(200);
                     } catch (final InterruptedException e) {
-                    }
+                    } catch (Exception e){}
                 }
             }
         }
@@ -572,7 +573,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 mUVCCamera.setPreviewTexture((SurfaceTexture) surface);
             }
             mUVCCamera.startPreview();
-            mUVCCamera.updateCameraParams();
+            //mUVCCamera.updateCameraParams();
             synchronized (mSync) {
                 mIsPreviewing = true;
             }
@@ -1070,79 +1071,93 @@ public abstract class AbstractUVCCameraHandler extends Handler {
         }
 
         private void callOnOpen() {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onOpen();
-                } catch (final Exception e) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
 
         private void callOnClose() {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onClose();
-                } catch (final Exception e) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
 
         private void callOnStartPreview() {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onStartPreview();
-                } catch (final Exception e) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
 
         private void callOnStopPreview() {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onStopPreview();
-                } catch (final Exception e) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
 
         private void callOnStartRecording() {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onStartRecording();
-                } catch (final Exception e) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
 
         private void callOnStopRecording() {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onStopRecording();
-                } catch (final Exception e) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
 
         private void callOnError(final Exception e) {
-            for (final CameraCallback callback : mCallbacks) {
-                try {
+            CameraCallback cameraCallback = null;
+            try{
+                for (final CameraCallback callback : mCallbacks) {
                     callback.onError(e);
-                } catch (final Exception e1) {
-                    mCallbacks.remove(callback);
-                    Log.w(TAG, e);
+                    cameraCallback = callback;
                 }
+            }catch (final Exception e1) {
+                mCallbacks.remove(cameraCallback);
+                Log.w(TAG, e);
             }
         }
     }

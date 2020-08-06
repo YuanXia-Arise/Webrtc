@@ -206,6 +206,9 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
             case 6:
                 resolv_six.setBackground(getResources().getDrawable(R.drawable.button_on));
                 break;
+                default:
+                    resolv_one.setBackground(getResources().getDrawable(R.drawable.button_on));
+                    break;
         }
     }
 
@@ -242,6 +245,10 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
             case 6:
                 program_six.setBackground(getResources().getDrawable(R.drawable.button_on));
                 break;
+                default:
+                    program_one.setBackground(getResources().getDrawable(R.drawable.button_on));
+                    break;
+
         }
     }
 

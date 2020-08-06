@@ -3,6 +3,7 @@ package com.dds.webrtclib;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -297,7 +298,6 @@ public class PeerConnectionHelper {
                     Usb_Camera = PrefSingleton.getInstance().getBoolean("USB_Camera");
                     byte[] bytes = new Util().readFileToByteArray();
                     ByteBuffer frame = ByteBuffer.wrap(bytes);
-                    System.out.println("123==1");
                     if (frame != null) {
                         imageArrayLock.lock();
                         byte[] imageArray = new byte[frame.capacity()]; // frame.remaining()
@@ -307,7 +307,6 @@ public class PeerConnectionHelper {
                         VideoFrame.Buffer mNV21Buffer = new NV21Buffer(nv21ToI420(imageArray,width_usb,height_usb),
                                 width_usb, height_usb,null);
                         VideoFrame videoFrame = new VideoFrame(mNV21Buffer, 0, imageTime);
-                        Log.d(TAG, "123==7");
                         videoSource.getCapturerObserver().onFrameCaptured(videoFrame);
                         videoFrame.release();
                         imageArrayLock.unlock();

@@ -1,6 +1,8 @@
 package org.Util;
 
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import org.java_websocket.client.WebSocketClient;
@@ -27,13 +29,13 @@ public class JWebSocketClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        new JWebSocketClient(URI.create("ws://139.224.12.24:2346")).reconnect();
         Log.e("JWebSocketClient", "onClose()");
+        //new JWebSocketClient(URI.create("ws://139.224.12.24:2346")).reconnect();
     }
 
     @Override
     public void onError(Exception ex) {
-        new JWebSocketClient(URI.create("ws://139.224.12.24:2346")).reconnect();
         Log.e("JWebSocketClient", "onError()");
+        //new JWebSocketClient(URI.create("ws://139.224.12.24:2346")).reconnect();
     }
 }
