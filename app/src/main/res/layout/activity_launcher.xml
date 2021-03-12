@@ -18,40 +18,63 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:layout_marginTop="3dp"
-            android:layout_marginLeft="375dp"
-            android:background="@drawable/ic_settings"/>
+            android:layout_marginStart="375dp"
+            android:background="@drawable/ic_settings"
+            tools:ignore="ContentDescription" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/ch34_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text=""
+        android:layout_marginTop="60dp"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/Imei"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ch34_status"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:text=""/>
 
     <TextView
         android:id="@+id/text1"
         android:layout_width="wrap_content"
         android:layout_height="22dp"
-        android:layout_marginTop="181dp"
-        android:layout_marginLeft="92dp"
+        android:layout_marginTop="151dp"
+        android:layout_marginStart="92dp"
         android:text="低流量模式"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
-
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
     <Switch
         android:id="@+id/button1"
         android:layout_width="67dp"
         android:layout_height="25dp"
-        android:layout_marginTop="180dp"
-        android:layout_marginLeft="245dp"
+        android:layout_marginTop="150dp"
+        android:layout_marginStart="245dp"
         android:checked="false"
         android:thumb="@drawable/ic_switch"
-        android:track="@drawable/button_on"
+        android:track="@drawable/switch_type"
         android:switchTextAppearance="@style/SwitchTextColorTheme"/>
     <TextView
         android:id="@+id/switch1"
         android:layout_width="wrap_content"
         android:layout_height="22dp"
-        android:layout_marginTop="180dp"
-        android:layout_marginLeft="4dp"
-        android:layout_toRightOf="@id/button1"
+        android:layout_marginTop="150dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button1"
         android:text="关"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
 
     <TextView
         android:id="@+id/text2"
@@ -59,31 +82,33 @@
         android:layout_height="22dp"
         android:layout_below="@+id/text1"
         android:layout_marginTop="27dp"
-        android:layout_marginLeft="92dp"
+        android:layout_marginStart="92dp"
         android:text="键盘"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
-
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
     <Switch
         android:id="@+id/button2"
         android:layout_width="67dp"
         android:layout_height="25dp"
-        android:layout_marginTop="227dp"
-        android:layout_marginLeft="245dp"
+        android:layout_marginTop="197dp"
+        android:layout_marginStart="245dp"
         android:checked="false"
         android:thumb="@drawable/ic_switch"
-        android:track="@drawable/button_on"
+        android:track="@drawable/switch_type"
         android:switchTextAppearance="@style/SwitchTextColorTheme"/>
     <TextView
         android:id="@+id/switch2"
         android:layout_width="wrap_content"
         android:layout_height="22dp"
-        android:layout_marginTop="227dp"
-        android:layout_marginLeft="4dp"
-        android:layout_toRightOf="@id/button2"
+        android:layout_marginTop="197dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button2"
         android:text="关"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
 
     <TextView
         android:id="@+id/text3"
@@ -91,67 +116,201 @@
         android:layout_height="22dp"
         android:layout_below="@+id/text2"
         android:layout_marginTop="27dp"
-        android:layout_marginLeft="92dp"
+        android:layout_marginStart="92dp"
         android:text="声音"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
-
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
     <Switch
         android:id="@+id/button3"
         android:layout_width="67dp"
         android:layout_height="25dp"
-        android:layout_marginTop="277dp"
-        android:layout_marginLeft="245dp"
+        android:layout_marginTop="247dp"
+        android:layout_marginStart="245dp"
         android:checked="false"
         android:thumb="@drawable/ic_switch"
-        android:track="@drawable/button_on"
+        android:track="@drawable/switch_type"
         android:switchTextAppearance="@style/SwitchTextColorTheme" />
     <TextView
         android:id="@+id/switch3"
         android:layout_width="wrap_content"
         android:layout_height="22dp"
-        android:layout_marginTop="277dp"
-        android:layout_marginLeft="4dp"
-        android:layout_toRightOf="@id/button3"
+        android:layout_marginTop="247dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button3"
         android:text="关"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
+
+    <TextView
+        android:id="@+id/text5"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text3"
+        android:layout_marginTop="27dp"
+        android:layout_marginStart="92dp"
+        android:text="免提"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+    <Switch
+        android:id="@+id/button5"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="297dp"
+        android:layout_marginStart="245dp"
+        android:checked="false"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/switch_type"
+        android:switchTextAppearance="@style/SwitchTextColorTheme" />
+    <TextView
+        android:id="@+id/switch5"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="297dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button5"
+        android:text="关"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
+
+    <TextView
+        android:id="@+id/text6"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text5"
+        android:layout_marginTop="27dp"
+        android:layout_marginStart="92dp"
+        android:text="自动对焦"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+    <Switch
+        android:id="@+id/button6"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="347dp"
+        android:layout_marginStart="245dp"
+        android:checked="false"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/switch_type"
+        android:switchTextAppearance="@style/SwitchTextColorTheme" />
+    <TextView
+        android:id="@+id/switch6"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="347dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button5"
+        android:text="关"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/text8"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text6"
+        android:layout_marginTop="27dp"
+        android:layout_marginStart="92dp"
+        android:text="时间水印"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+    <Switch
+        android:id="@+id/button8"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="397dp"
+        android:layout_marginStart="245dp"
+        android:checked="false"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/switch_type"
+        android:switchTextAppearance="@style/SwitchTextColorTheme" />
+    <TextView
+        android:id="@+id/switch8"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="397dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button5"
+        android:text="关"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
+
+    <TextView
+        android:id="@+id/text7"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_below="@+id/text8"
+        android:layout_marginTop="27dp"
+        android:layout_marginStart="92dp"
+        android:text="视频录制"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+    <Switch
+        android:id="@+id/button7"
+        android:layout_width="67dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="447dp"
+        android:layout_marginStart="245dp"
+        android:checked="false"
+        android:thumb="@drawable/ic_switch"
+        android:track="@drawable/switch_type"
+        android:switchTextAppearance="@style/SwitchTextColorTheme" />
+    <TextView
+        android:id="@+id/switch7"
+        android:layout_width="wrap_content"
+        android:layout_height="22dp"
+        android:layout_marginTop="437dp"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@id/button5"
+        android:text="关"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
+
 
     <TextView
         android:id="@+id/text4"
         android:layout_width="wrap_content"
         android:layout_height="22dp"
-        android:layout_below="@+id/text3"
+        android:layout_below="@+id/text7"
         android:layout_marginTop="27dp"
-        android:layout_marginLeft="92dp"
+        android:layout_marginStart="92dp"
         android:text="视频源选择"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"/>
-
+        android:textColor="#FFFFFF"
+        tools:ignore="HardcodedText" />
     <ImageView
         android:id="@+id/image1"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginTop="326dp"
-        android:layout_marginLeft="235dp"
+        android:layout_marginTop="496dp"
+        android:layout_marginStart="235dp"
         android:background="@drawable/ic_switch"/>
-
     <ImageView
         android:id="@+id/image2"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginTop="354dp"
-        android:layout_marginLeft="235dp"
+        android:layout_marginTop="524dp"
+        android:layout_marginStart="235dp"
         android:background="@drawable/ic_switch"/>
-
     <RadioGroup
         android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="321dp"
-        android:layout_marginLeft="259dp"
+        android:layout_marginTop="491dp"
+        android:layout_marginStart="259dp"
         android:orientation="vertical">
-
         <RadioButton
             android:id="@+id/video_one"
             android:layout_width="wrap_content"
@@ -161,8 +320,8 @@
             android:padding="3dp"
             android:text="视频源1"
             android:textColor="#FFFFFF"
-            android:textSize="16sp" />
-
+            android:textSize="16sp"
+            tools:ignore="HardcodedText" />
         <RadioButton
             android:id="@+id/video_two"
             android:layout_width="wrap_content"
@@ -171,33 +330,39 @@
             android:text="视频源2"
             android:textSize="16sp"
             android:textColor="#FFFFFF"
-            android:button="@null"/>
+            android:button="@null"
+            android:visibility="invisible"
+            tools:ignore="HardcodedText" />
     </RadioGroup>
 
     <ImageView
         android:layout_width="85dp"
         android:layout_height="84dp"
-        android:layout_marginLeft="167dp"
-        android:layout_marginTop="144dp"
+        android:layout_marginStart="167dp"
+        android:layout_marginTop="104dp"
         android:layout_below="@+id/text4"
-        android:src="@drawable/ic_calls"/>
-
+        android:src="@drawable/ic_calls"
+        tools:ignore="ContentDescription" />
     <ImageButton
         android:id="@+id/Calling"
         android:layout_width="72dp"
         android:layout_height="71dp"
-        android:layout_marginLeft="174dp"
-        android:layout_marginTop="151dp"
+        android:layout_marginStart="174dp"
+        android:layout_marginTop="111dp"
         android:layout_below="@+id/text4"
-        android:background="@drawable/ic_calling"/>
+        android:background="@drawable/ic_calling"
+        tools:ignore="ContentDescription" />
     <TextView
+        android:id="@+id/call_id"
         android:layout_width="40dp"
         android:layout_height="30dp"
-        android:layout_marginLeft="189dp"
+        android:layout_marginStart="189dp"
         android:layout_below="@+id/Calling"
         android:text="拨号"
         android:textSize="16sp"
         android:textColor="#FFFFFF"
-        android:gravity="center"/>
+        android:gravity="center"
+        tools:ignore="HardcodedText" />
+
 
 </RelativeLayout>

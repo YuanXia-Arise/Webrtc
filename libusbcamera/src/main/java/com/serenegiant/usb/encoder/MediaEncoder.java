@@ -1,15 +1,12 @@
 package com.serenegiant.usb.encoder;
 
-import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.dds.libusbcamera.utils.FileUtils;
-import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -32,7 +29,8 @@ public abstract class MediaEncoder implements Runnable {
 		void onPrepared(MediaEncoder encoder);
 		void onStopped(MediaEncoder encoder);
 		// 音频或视频流，type=0为音频，type=1为视频
-		void onEncodeResult(byte[] data, int offset, int length, long timestamp, int type);
+		void onEncodeResult(byte[] data, int offset,
+                            int length, long timestamp, int type);
 	}
 
 	protected final Object mSync = new Object();
@@ -322,9 +320,9 @@ public abstract class MediaEncoder implements Runnable {
 			}
 			final ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
 			int bufferIndex = -1;
-			try{
+			try {
 				bufferIndex = mMediaCodec.dequeueInputBuffer(0);
-			}catch (IllegalStateException e){
+			} catch (IllegalStateException e) {
 				e.printStackTrace();
 			}
 			if (bufferIndex >= 0) {
@@ -355,7 +353,6 @@ public abstract class MediaEncoder implements Runnable {
      */
     @SuppressWarnings("deprecation")
 	protected void encode(final ByteBuffer buffer, final int length, final long presentationTimeUs) {
-//    	if (DEBUG) Log.v(TAG, "encode:buffer=" + buffer);
     	if (!mIsCapturing) return;
     	int ix = 0, sz;
         final ByteBuffer[] inputBuffers = mMediaCodec.getInputBuffers();
@@ -372,9 +369,7 @@ public abstract class MediaEncoder implements Runnable {
 	            	inputBuffer.put(buffer);
 	            }
 	            ix += sz;
-//	            if (DEBUG) Log.v(TAG, "encode:queueInputBuffer");
 	            if (length <= 0) {
-	            	// send EOS
 	            	mIsEOS = true;
 	            	if (DEBUG) Log.i(TAG, "send BUFFER_FLAG_END_OF_STREAM");
 	            	mMediaCodec.queueInputBuffer(inputBufferIndex, 0, 0,
@@ -504,17 +499,17 @@ public abstract class MediaEncoder implements Runnable {
 						if (sync) {
 							System.arraycopy(mPpsSps, 0, h264, 0, mPpsSps.length);
 							encodedData.get(h264, mPpsSps.length, mBufferInfo.size);
-
 							if(mListener != null) {
-								mListener.onEncodeResult(h264, 0,mPpsSps.length + mBufferInfo.size, mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);
+								mListener.onEncodeResult(h264, 0,mPpsSps.length + mBufferInfo.size,
+										mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);
 							}
-							FileUtils.putFileStream(h264, 0,mPpsSps.length + mBufferInfo.size); //保存数据流到文件
+							// 保存数据流到文件
+							FileUtils.putFileStream(h264, 0,mPpsSps.length + mBufferInfo.size);
 						} else {
 							encodedData.get(h264, 0, mBufferInfo.size);
-
-
 							if(mListener != null) {
-								mListener.onEncodeResult(h264, 0,mBufferInfo.size, mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);
+								mListener.onEncodeResult(h264, 0,mBufferInfo.size,
+										mBufferInfo.presentationTimeUs / 1000,TYPE_VIDEO);
 							}
 							FileUtils.putFileStream(h264, 0,mBufferInfo.size);
 						}
@@ -526,11 +521,13 @@ public abstract class MediaEncoder implements Runnable {
 						addADTStoPacket(mBuffer.array(), mBufferInfo.size + 7);
 						mBuffer.flip();
 						if(mListener != null){
-							mListener.onEncodeResult(mBuffer.array(),0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000,TYPE_AUDIO);
+							mListener.onEncodeResult(mBuffer.array(),0, mBufferInfo.size + 7,
+									mBufferInfo.presentationTimeUs / 1000,TYPE_AUDIO);
 						}
 					}
                 }
-                mMediaCodec.releaseOutputBuffer(encoderStatus, false); // 释放输出缓存，将其还给编码器
+                // 释放输出缓存，将其还给编码器
+                mMediaCodec.releaseOutputBuffer(encoderStatus, false);
             }
         }
     }

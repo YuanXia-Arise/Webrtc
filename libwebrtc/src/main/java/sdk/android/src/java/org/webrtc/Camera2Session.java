@@ -13,7 +13,8 @@ package org.webrtc;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.hardware.Camera;
+import android.graphics.Camera;
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -24,9 +25,12 @@ import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
+import android.media.Image;
+import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
 
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Range;
 import android.view.Surface;
@@ -35,6 +39,7 @@ import androidx.annotation.RequiresApi;
 
 import com.google.gson.Gson;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -47,11 +52,11 @@ class Camera2Session implements CameraSession {
   private static final String TAG = "Camera2Session";
 
   private static final Histogram camera2StartTimeMsHistogram =
-      Histogram.createCounts("WebRTC.Android.Camera2.StartTimeMs", 1, 10000, 50);
+          Histogram.createCounts("WebRTC.Android.Camera2.StartTimeMs", 1, 10000, 50);
   private static final Histogram camera2StopTimeMsHistogram =
-      Histogram.createCounts("WebRTC.Android.Camera2.StopTimeMs", 1, 10000, 50);
+          Histogram.createCounts("WebRTC.Android.Camera2.StopTimeMs", 1, 10000, 50);
   private static final Histogram camera2ResolutionHistogram = Histogram.createEnumeration(
-      "WebRTC.Android.Camera2.Resolution", CameraEnumerationAndroid.COMMON_RESOLUTIONS.size());
+          "WebRTC.Android.Camera2.Resolution", CameraEnumerationAndroid.COMMON_RESOLUTIONS.size());
 
   private static enum SessionState { RUNNING, STOPPED }
 
@@ -74,11 +79,11 @@ class Camera2Session implements CameraSession {
   private CaptureFormat captureFormat;
 
   // Initialized when camera opens
-    private CameraDevice cameraDevice;
-    private Surface surface;
+  private CameraDevice cameraDevice;
+  private Surface surface;
 
   // Initialized when capture session is created
-    private CameraCaptureSession captureSession;
+  private CameraCaptureSession captureSession;
 
   // State
   private SessionState state = SessionState.RUNNING;
@@ -100,7 +105,7 @@ class Camera2Session implements CameraSession {
           return "Camera service has encountered a fatal error.";
         case CameraDevice.StateCallback.ERROR_MAX_CAMERAS_IN_USE:
           return "Camera device could not be opened because"
-              + " there are too many other open camera devices.";
+                  + " there are too many other open camera devices.";
         default:
           return "Unknown camera error: " + errorCode;
       }
@@ -136,7 +141,7 @@ class Camera2Session implements CameraSession {
       surface = new Surface(surfaceTextureHelper.getSurfaceTexture());
       try {
         camera.createCaptureSession(
-            Arrays.asList(surface), new CaptureSessionCallback(), cameraThreadHandler);
+                Arrays.asList(surface), new CaptureSessionCallback(), cameraThreadHandler);
       } catch (CameraAccessException e) {
         reportError("Failed to create capture session." + e);
         return;
@@ -173,31 +178,29 @@ class Camera2Session implements CameraSession {
          *   quality.
          */
         final CaptureRequest.Builder captureRequestBuilder =
-            cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+                cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
         // Set auto exposure fps range.
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-            new Range<Integer>(captureFormat.framerate.min / fpsUnitFactor,
-                captureFormat.framerate.max / fpsUnitFactor));
+                new Range<Integer>(captureFormat.framerate.min / fpsUnitFactor,
+                        captureFormat.framerate.max / fpsUnitFactor));
 
         //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);//设置自动聚焦
         //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH); //设置自动曝光
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
         captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
-        //captureRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, (float)99.0);
+        //captureRequestBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, (float)99.0f);
         //captureRequestBuilder.set(CaptureRequest.LENS_FOCAL_LENGTH, (float) 99.0f);
         if (PrefSingleton.getInstance().getBoolean("flow_mode")) {
-          //captureRequestBuilder.set(CaptureRequest.CONTROL_MODE,CaptureRequest.CONTROL_AE_MODE_ON);
           captureRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE,CaptureRequest.CONTROL_EFFECT_MODE_MONO);
-          //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE,CaptureRequest.CONTROL_AWB_MODE_SHADE);
-        } else {
         }
+
 
         chooseStabilizationMode(captureRequestBuilder);
         chooseFocusMode(captureRequestBuilder);
 
         captureRequestBuilder.addTarget(surface);
         session.setRepeatingRequest(
-            captureRequestBuilder.build(), new CameraCaptureCallback(), cameraThreadHandler);
+                captureRequestBuilder.build(), new CameraCaptureCallback(), cameraThreadHandler);
       } catch (CameraAccessException e) {
         reportError("Failed to start capture request. " + e);
         return;
@@ -213,8 +216,7 @@ class Camera2Session implements CameraSession {
 
         if (!firstFrameReported) {
           firstFrameReported = true;
-          final int startTimeMs =
-              (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - constructionTimeNs);
+          final int startTimeMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - constructionTimeNs);
           camera2StartTimeMsHistogram.addSample(startTimeMs);
         }
 
@@ -222,11 +224,10 @@ class Camera2Session implements CameraSession {
         // http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
         // Also, undo camera orientation, we report it as rotation instead.
         final VideoFrame modifiedFrame =
-            new VideoFrame(CameraSession.createTextureBufferWithModifiedTransformMatrix(
-                               (TextureBufferImpl) frame.getBuffer(),
-                               /* mirror= */ isCameraFrontFacing,
-                               /* rotation= */ -cameraOrientation),
-                /* rotation= */ getFrameOrientation(), frame.getTimestampNs());
+                new VideoFrame(CameraSession.createTextureBufferWithModifiedTransformMatrix(
+                        (TextureBufferImpl) frame.getBuffer(),
+                        isCameraFrontFacing, -cameraOrientation),
+                        getFrameOrientation(), frame.getTimestampNs());
         events.onFrameCaptured(Camera2Session.this, modifiedFrame);
         modifiedFrame.release();
       });
@@ -238,14 +239,14 @@ class Camera2Session implements CameraSession {
     // the stabilization modes at a time because having both enabled can cause strange results.
     private void chooseStabilizationMode(CaptureRequest.Builder captureRequestBuilder) {
       final int[] availableOpticalStabilization = cameraCharacteristics.get(
-          CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+              CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
       if (availableOpticalStabilization != null) {
         for (int mode : availableOpticalStabilization) {
           if (mode == CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON) {
             captureRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,
-                CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);
+                    CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);
             captureRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,
-                CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
+                    CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             Logging.d(TAG, "Using optical stabilization.");
             return;
           }
@@ -253,13 +254,13 @@ class Camera2Session implements CameraSession {
       }
       // If no optical mode is available, try software.
       final int[] availableVideoStabilization = cameraCharacteristics.get(
-          CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
+              CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
       for (int mode : availableVideoStabilization) {
         if (mode == CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON) {
           captureRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,
-              CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON);
+                  CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON);
           captureRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,
-              CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
+                  CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
           Logging.d(TAG, "Using video stabilization.");
           return;
         }
@@ -268,7 +269,7 @@ class Camera2Session implements CameraSession {
     }
 
     private void chooseFocusMode(CaptureRequest.Builder captureRequestBuilder) {
-      final int[] availableFocusModes =
+      /*final int[] availableFocusModes =
           cameraCharacteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
       for (int mode : availableFocusModes) {
         if (mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) {
@@ -278,29 +279,37 @@ class Camera2Session implements CameraSession {
           return;
         }
       }
-      Logging.d(TAG, "Auto-focus is not available.");
+      Logging.d(TAG, "Auto-focus is not available.");*/
+      if (PrefSingleton.getInstance().getBoolean("focus_mode")){
+        captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
+      } else {
+        captureRequestBuilder.set(
+                CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
+      }
     }
+
   }
 
   private static class CameraCaptureCallback extends CameraCaptureSession.CaptureCallback {
     @Override
     public void onCaptureFailed(
-        CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
+            CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
       Logging.d(TAG, "Capture failed: " + failure);
     }
   }
 
   public static void create(CreateSessionCallback callback, Events events,
-      Context applicationContext, CameraManager cameraManager,
-      SurfaceTextureHelper surfaceTextureHelper, String cameraId, int width, int height,
-      int framerate) {
+                            Context applicationContext, CameraManager cameraManager,
+                            SurfaceTextureHelper surfaceTextureHelper, String cameraId, int width, int height,
+                            int framerate) {
     new Camera2Session(callback, events, applicationContext, cameraManager, surfaceTextureHelper,
-        cameraId, width, height, framerate);
+            cameraId, width, height, framerate);
   }
 
   private Camera2Session(CreateSessionCallback callback, Events events, Context applicationContext,
-      CameraManager cameraManager, SurfaceTextureHelper surfaceTextureHelper, String cameraId,
-      int width, int height, int framerate) {
+                         CameraManager cameraManager, SurfaceTextureHelper surfaceTextureHelper, String cameraId,
+                         int width, int height, int framerate) {
     Logging.d(TAG, "Create new camera2 session on camera " + cameraId);
 
     constructionTimeNs = System.nanoTime();
@@ -325,16 +334,13 @@ class Camera2Session implements CameraSession {
 
     try {
       cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
-      //System.out.println("876876:" + cameraCharacteristics.getAvailableCaptureRequestKeys().toString());
-      //int[] available = cameraCharacteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS);
-      //System.out.println("777777:" + new Gson().toJson(available));
     } catch (final CameraAccessException e) {
       reportError("getCameraCharacteristics(): " + e.getMessage());
       return;
     }
     cameraOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
     isCameraFrontFacing = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING)
-        == CameraMetadata.LENS_FACING_FRONT;
+            == CameraMetadata.LENS_FACING_FRONT;
 
     findCaptureFormat();
     openCamera();
@@ -344,10 +350,10 @@ class Camera2Session implements CameraSession {
     checkIsOnCameraThread();
 
     Range<Integer>[] fpsRanges =
-        cameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
+            cameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
     fpsUnitFactor = Camera2Enumerator.getFpsUnitFactor(fpsRanges);
     List<CaptureFormat.FramerateRange> framerateRanges =
-        Camera2Enumerator.convertFramerates(fpsRanges, fpsUnitFactor);
+            Camera2Enumerator.convertFramerates(fpsRanges, fpsUnitFactor);
     List<Size> sizes = Camera2Enumerator.getSupportedSizes(cameraCharacteristics);
     Logging.d(TAG, "Available preview sizes: " + sizes);
     Logging.d(TAG, "Available fps ranges: " + framerateRanges);
@@ -358,7 +364,7 @@ class Camera2Session implements CameraSession {
     }
 
     final CaptureFormat.FramerateRange bestFpsRange =
-        CameraEnumerationAndroid.getClosestSupportedFramerateRange(framerateRanges, framerate);
+            CameraEnumerationAndroid.getClosestSupportedFramerateRange(framerateRanges, framerate);
 
     final Size bestSize = CameraEnumerationAndroid.getClosestSupportedSize(sizes, width, height);
     CameraEnumerationAndroid.reportCameraResolution(camera2ResolutionHistogram, bestSize);

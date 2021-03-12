@@ -1,1 +1,2 @@
-include ':app', ':libwebrtc', ':module_meeting','libusbcamera'
+include ':app', ':libwebrtc', ':module_meeting', 'libusbcamera'/* , ':ch34xuartdriver'*/
+

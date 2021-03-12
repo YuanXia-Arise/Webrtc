@@ -6,9 +6,11 @@ import android.text.TextUtils;
 import com.dds.webrtclib.WebRTCManager;
 import com.dds.webrtclib.bean.MediaType;
 import com.dds.webrtclib.bean.MyIceServer;
-import com.dds.webrtclib.ui.ChatRoomActivity;
 import com.dds.webrtclib.ui.ChatSingleActivity;
 import com.dds.webrtclib.ws.IConnectEvent;
+
+import org.activity.ChatRoomActivity;
+
 
 /**
  * Created by dds on 2019/1/7.
@@ -16,26 +18,26 @@ import com.dds.webrtclib.ws.IConnectEvent;
  */
 public class WebrtcUtil {
 
-    public static final String HOST = "139.224.12.24";
+    //public static final String HOST = "101.132.186.228";
+    public static String HOST;
 
     // turn and stun
     private static MyIceServer[] iceServers = {
             new MyIceServer("stun:stun.l.google.com:19302"),
 
-            // 测试地址1
+            // 地址1
             new MyIceServer("stun:" + HOST + ":3478?transport=udp"),
-            //new MyIceServer("turn:" + HOST + ":3478?transport=udp","ddssingsong","123456"),
+            new MyIceServer("turn:" + HOST + ":3478?transport=udp","ddssingsong","123456"),
             new MyIceServer("turn:" + HOST + ":3478?transport=tcp","ddssingsong","123456"),
     };
 
-    // signalling
-    private static String WSS = "wss://139.224.12.24/wss"; // 默认IP地址
+    //private static String WSS = "wss://101.132.186.228/wss"; // 默认IP地址
 
     // one to one
     public static void callSingle(Activity activity, String wss, String roomId, boolean videoEnable) {
-        if (TextUtils.isEmpty(wss)) {
+        /*if (TextUtils.isEmpty(wss)) {
             wss = WSS;
-        }
+        }*/
         WebRTCManager.getInstance().init(wss, iceServers, new IConnectEvent() {
             @Override
             public void onSuccess() {
@@ -52,10 +54,12 @@ public class WebrtcUtil {
 
     // meeting
     public static void call(Activity activity, String wss, String roomId) {
-        if (TextUtils.isEmpty(wss)) {
+        /*if (TextUtils.isEmpty(wss)) {
             wss = WSS;
-        }
-        WebRTCManager.getInstance().init(wss, iceServers, new IConnectEvent() {
+        }*/
+        HOST = wss;
+        String Wss = "wss://" + wss + "/wss";
+        WebRTCManager.getInstance().init(Wss, iceServers, new IConnectEvent() {
             @Override
             public void onSuccess() {
                 ChatRoomActivity.openActivity(activity);
@@ -68,6 +72,5 @@ public class WebrtcUtil {
         });
         WebRTCManager.getInstance().connect(MediaType.TYPE_MEETING, roomId);
     }
-
 
 }

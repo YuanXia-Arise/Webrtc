@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+        tools:ignore="Orientation"
+        android:background="@drawable/rectangle">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/editText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="54dp"
+                android:layout_marginTop="30dp"
+                android:background="@null"
+                android:fontFamily="sans-serif-light"
+                android:gravity="center_vertical|end"
+                android:inputType="textNoSuggestions|textMultiLine"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:textColor="#eeeeee"
+                android:textSize="66sp" />
+
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+
+                <TextView
+                    android:id="@+id/text_out"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:fontFamily="sans-serif-light"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:singleLine="true"
+                    android:textColor="#bdbdbd"
+                    android:textSize="48sp" />
+
+            </HorizontalScrollView>
+
+        </FrameLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.drawerlayout.widget.DrawerLayout
+        android:id="@+id/drawer_main"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1.618">
+
+        <include layout="@layout/content_main" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="#bdbdbd"
+            android:orientation="vertical">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabs_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#bdbdbd"
+                android:elevation="2dp"
+                app:tabIndicatorColor="#424242"
+                app:tabSelectedTextColor="#212121"
+                app:tabTextAppearance="@style/TabLayoutTextStyle"
+                app:tabTextColor="#616161" />
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewPager_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+    </androidx.drawerlayout.widget.DrawerLayout>
+
+</LinearLayout>

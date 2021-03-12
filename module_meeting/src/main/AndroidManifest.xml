@@ -15,6 +15,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />  <!--悬浮窗显示-->
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
 
     <application><!--android:screenOrientation="fullUser"-->
         <activity
@@ -29,6 +31,7 @@
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
             android:theme="@style/Webrtc.AppTheme.NoActionBar" />
+
     </application>
 
 </manifest>

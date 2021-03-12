@@ -16,15 +16,15 @@ public class WebSocket {
         JSONObject jsonObj = null;
         try {
             jsonObj = new JSONObject(inData);
-            if (jsonObj.length() == 2){
+            if (jsonObj.length() == 3){
                 String methon = (String) jsonObj.get("methon");
                 String arg1 = String.valueOf(jsonObj.get("arg1"));
-                send_data_a(methon, arg1);
-            } else if (jsonObj.length() == 3){
+                send_data_a(methon, arg1); // 键盘
+            } else if (jsonObj.length() == 4){
                 String methon = (String) jsonObj.get("methon");
                 int arg1 = (int) jsonObj.get("arg1");
                 int arg2 = (int) jsonObj.get("arg2");
-                send_data(methon, arg1, arg2);
+                send_data(methon, arg1, arg2); // 鼠标
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -34,35 +34,69 @@ public class WebSocket {
     public void send_data(String methon, int arg1, int arg2) {
         byte a1 = (byte) 0xf0; // 起始符
         byte a2 = 0x00;
-        byte x1,x2,y1,y2,a7;
-        byte a8 = (byte) 0xff; // 结束符
+        byte a7 = 0x00;
+        byte x1,x2,y1,y2,a8;
+        byte a9 = (byte) 0xff; // 结束符
         if (methon.equals("MouseMove")) {
             a2 = 0x01; // 指令
         }
+        if (arg1 >= 0 && arg2 >= 0){
+            a7 = (byte) 0xee;
+        } else if (arg1 >= 0 && arg2 < 0){
+            a7 = (byte) 0xe0;
+        } else if (arg1 < 0 && arg2 < 0){
+            a7 = (byte) 0x00;
+        } else if (arg1 < 0 && arg2 >= 0){
+            a7 = (byte) 0x0e;
+        }
+
         if (arg1 >= 0) { // X轴
-            x1 = toByteArray(String.valueOf(-arg1))[0];
-            x2 = 0x00;
+            x1 = (byte) (arg1/0xef);
+            x2 = (byte) (arg1%0xef);
         } else {
-            x1 = 0x00;
-            x2 = toByteArray(String.valueOf(arg1))[0];
+            x1 = (byte) (-arg1/0xef);
+            x2 = (byte) (-arg1%0xef);
         }
         if (arg2 >= 0) { // Y轴
-            y1 = toByteArray(String.valueOf(-arg2))[0];
-            y2 = 0x00;
+            y1 = (byte) (arg2/0xef);
+            y2 = (byte) (arg2%0xef);
         } else {
-            y1 = 0x00;
-            y2 = toByteArray(String.valueOf(arg2))[0];
+            y1 = (byte) (-arg2/0xef);
+            y2 = (byte) (-arg2%0xef);
         }
-        a7 = (byte) ((a2 + x1 + x2 + y1 + y2) % 0xef); // 检验符
 
-        byte[] to_send = {a1,a2,x1,x2,y1,y2,a7,a8};
-        MyApp.driver.WriteData(to_send, to_send.length);
+        /*if (arg1 >= 0) { // X轴
+            x1 = (byte) (toByteArray(String.valueOf(-arg1))[0]/0xef);
+            x2 = 0x00%0xef;
+        } else {
+            x1 = 0x00/0xef;
+            x2 = (byte) (toByteArray(String.valueOf(arg1))[0]%0xef);
+        }
+        if (arg2 >= 0) { // Y轴
+            y1 = (byte) (toByteArray(String.valueOf(-arg2))[0]/0xef);
+            y2 = 0x00%0xef;
+        } else {
+            y1 = 0x00/0xef;
+            y2 = (byte) (toByteArray(String.valueOf(arg2))[0]%0xef);
+        }*/
+
+        a8 = (byte) ((a2 + x1 + x2 + y1 + y2 + a7) & 0xef); // 检验符
+
+        byte[] to_send = {a1,a2,x1,x2,y1,y2,a7,a8,a9};
+        Log.d(TAG, "鼠标:" + toHexString(to_send,to_send.length));
+        //MyApp.driver.writeData(to_send, to_send.length); // 返回值为写入成功的字节数
+        if (MyApp.driver.writeData(to_send, to_send.length) == 9) {
+            Log.d(TAG, "写人成功");
+        } else {
+            Log.d(TAG, "写人失败");
+        }
     }
 
     public void send_data_a(String methon, String arg1) {
         byte a1 = (byte) 0xf0; // 起始符
-        byte a2 = 0x00,a3 = 0x00,a4 = 0x00,a5 = 0x00,a6 = 0x00,a7;
-        byte a8 = (byte) 0xff; // 结束符
+        byte a2 = 0x00,a3 = 0x00,a4 = 0x00,a5 = 0x00,a6 = 0x00,a8;
+        byte a7 = 0x00;
+        byte a9 = (byte) 0xff; // 结束符
 
         if (methon.equals("MouseUp")) {
             a2 = 0x04; // 指令
@@ -86,7 +120,7 @@ public class WebSocket {
                 arg1 = "2";
             }
             a3 = Byte.parseByte(arg1);
-        } else if (methon.equals("KeyDown")){
+        } else if (methon.equals("KeyDown") && !arg1.equals("ReleaseAll")){
             a2 = 0x03;
             //a3 = toByteArray(convertStringToHex(arg1))[0];
             a3 = aByte(arg1);
@@ -96,11 +130,16 @@ public class WebSocket {
             a3 = aByte(arg1);
         }
 
-        a7 = (byte) ((a2 + a3 + a4 + a5 + a6) % 0xef); // 检验符
+        a8 = (byte) ((a2 + a3 + a4 + a5 + a6 + a7) & 0xef); // 检验符
 
-        byte[] to_send = {a1,a2,a3,a4,a5,a6,a7,a8};
-        Log.d(TAG, "999999:" + toHexString(to_send,to_send.length));
-        MyApp.driver.WriteData(to_send, to_send.length);
+        byte[] to_send = {a1,a2,a3,a4,a5,a6,a7,a8,a9};
+        Log.d(TAG, "键盘:" + toHexString(to_send,to_send.length));
+        //MyApp.driver.writeData(to_send, to_send.length); // 返回值为写入成功的字节数
+        if (MyApp.driver.writeData(to_send, to_send.length) == 9) {
+            Log.d(TAG, "写人成功");
+        } else {
+            Log.d(TAG, "写人失败");
+        }
     }
 
     public byte aByte(String s){
@@ -167,7 +206,7 @@ public class WebSocket {
                 a = (byte) 0x10;
                 break;
             case "Control":
-                a = (byte) 0x97;
+                a = (byte) 0xa2;
                 break;
             case "Alt":
                 a = (byte) 0x98;
@@ -210,6 +249,12 @@ public class WebSocket {
                 break;
             case "\\":
                 a = (byte) 0x5c;
+                break;
+            case "Meta":
+                a = (byte) 0x9f;
+                break;
+            case "ReleaseAll":
+                a = (byte) 0x8f;
                 break;
             default:
                 a = toByteArray(convertStringToHex(s))[0];

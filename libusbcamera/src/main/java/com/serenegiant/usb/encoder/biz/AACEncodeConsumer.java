@@ -1,5 +1,6 @@
 package com.serenegiant.usb.encoder.biz;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -12,16 +13,12 @@ import android.os.Build;
 import android.os.Process;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**将PCM编码为AAC
  *
@@ -140,6 +137,7 @@ public class AACEncodeConsumer extends Thread{
     }
 
 
+    @SuppressLint("WrongConstant")
     @TargetApi(21)
     private void encodeBytes(byte[] audioBuf, int readBytes) {
         ByteBuffer[] inputBuffers = mAudioEncoder.getInputBuffers();

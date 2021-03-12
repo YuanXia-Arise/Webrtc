@@ -150,7 +150,7 @@
             android:layout_marginTop="212dp"
             android:layout_marginLeft="55dp"
             android:theme="@style/MyEditText"
-            android:hint="请输入服务器地址"
+            android:hint="请输入服务器地址：139.224.12.24"
             android:textColorHint="#FFFFFF"/>
 
 
@@ -230,11 +230,38 @@
             android:textSize="16sp"
             android:textColor="#FFFFFF"/>
 
+        <ImageView
+            android:layout_width="19dp"
+            android:layout_height="19dp"
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="414dp"
+            android:background="@drawable/ic_url"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="22dp"
+            android:layout_marginTop="412dp"
+            android:layout_marginLeft="55dp"
+            android:text="进入密码"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"/>
+
+        <EditText
+            android:id="@+id/psw"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="442dp"
+            android:layout_marginLeft="55dp"
+            android:theme="@style/MyEditText"
+            android:hint="请输入进入密码"
+            android:textColorHint="#FFFFFF"/>
+
         <Button
             android:id="@+id/enter"
             android:layout_width="267dp"
             android:layout_height="40dp"
-            android:layout_marginTop="442dp"
+            android:layout_marginTop="502dp"
             android:layout_marginLeft="77dp"
             android:background="@drawable/button_on"
             android:text="确定"

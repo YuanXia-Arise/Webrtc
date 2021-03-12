@@ -1,10 +1,21 @@
 package com.dds.webrtclib.ui;
 
 import android.app.Activity;
+import android.app.LauncherActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
+import android.media.AudioRecord;
+import android.media.CamcorderProfile;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -13,6 +24,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,19 +44,30 @@ import com.dds.webrtclib.utils.PermissionUtil;
 import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.common.AbstractUVCCameraHandler;
+import com.serenegiant.usb.encoder.RecordParams;
 import com.serenegiant.usb.widget.CameraViewInterface;
 
+import org.webrtc.AudioSource;
 import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
+import org.webrtc.NV21Buffer;
 import org.webrtc.PrefSingleton;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
+import org.webrtc.VideoFrame;
 import org.webrtc.VideoTrack;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 群聊界面
@@ -59,7 +84,10 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
     private EglBase rootEglBase;
 
-    private ImageButton DisCalling;
+    private ImageButton DisCalling,Voiceing,Speaking;
+
+    public SeekBar mSeekBrightness;
+    private android.widget.LinearLayout linearLayout;
 
     public static void openActivity(Activity activity) {
         Intent intent = new Intent(activity, ChatRoomActivity.class);
@@ -75,17 +103,47 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); // 全屏
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.wr_activity_chat_room);
+
+        video_type = PrefSingleton.getInstance().getInt("video");
+        if (video_type == 1){
+            setContentView(R.layout.wr_activity_chat_room);
+        } else {
+            setContentView(R.layout.wr_activity_chat_room2);
+        }
+
+        linearLayout = findViewById(R.id.layout_contrast);
+
         initView();
         initVar();
 
         if (video_type == 1) {
+            linearLayout.setVisibility(View.VISIBLE);
             startCall();
         }
 
+        mSeekBrightness = findViewById(R.id.seekbar_contrast);
+        mSeekBrightness.setProgress(0);
+        PrefSingleton.getInstance().putInt("Seek",0);
+        mSeekBrightness.setMax(99);
+        mSeekBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                PrefSingleton.getInstance().putInt("Seek",progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
     }
 
 
+    private int Voice = 0;
+    private int Speak = 0;
     private void initView() {
         wr_video_view = findViewById(R.id.wr_video_view);
 
@@ -96,6 +154,49 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 hangUp();
             }
         });
+
+        Voiceing = findViewById(R.id.Voiceing);
+        if (PrefSingleton.getInstance().getBoolean("voice_mode")){
+            Voiceing.setBackgroundResource(R.drawable.ic_voiceing);
+            Voiceing.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (Voice == 0){
+                        Voiceing.setBackgroundResource(R.drawable.ic_voices);
+                        toggleMic(false);
+                        Voice = 1;
+                    } else {
+                        Voiceing.setBackgroundResource(R.drawable.ic_voiceing);
+                        toggleMic(true);
+                        Voice = 0;
+                    }
+                }
+            });
+        } else {
+            Voiceing.setBackgroundResource(R.drawable.ic_voices);
+        }
+
+        Speaking = findViewById(R.id.Speaking);
+        if (PrefSingleton.getInstance().getBoolean("speak_mode")){
+            Speaking.setBackgroundResource(R.drawable.ic_speaking);
+            Speaking.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (Speak == 0){
+                        Speaking.setBackgroundResource(R.drawable.ic_speaks);
+                        toggleSpeaker(false);
+                        Speak = 1;
+                    } else {
+                        Speaking.setBackgroundResource(R.drawable.ic_speaking);
+                        toggleSpeaker(true);
+                        Speak = 0;
+                    }
+                }
+            });
+        } else {
+            Speaking.setBackgroundResource(R.drawable.ic_speaks);
+        }
+
     }
 
     private void initVar() {
@@ -124,12 +225,43 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                         if (status == 0) {
                             startCall();
                             status = 1;
+
+                            if (PrefSingleton.getInstance().getBoolean("recorder_mode")){
+                            //20200901 UVC_Camera视频录制
+                            //String srcPath = "/storage/emulated/0/Download/Webrtc_Recorder/video/";
+                            String srcPath = "/sdcard/Download/" + getPackageName() + "/video/";
+                            String videoPath = srcPath + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(System.currentTimeMillis()));
+                            RecordParams params = new RecordParams();
+                            params.setRecordPath(videoPath);
+                            params.setRecordDuration(0); // auto divide saved,default 0 means not divided
+                            params.setVoiceClose(true); // is close voice
+                            params.setSupportOverlay(false); // overlay only support armeabi-v7a & arm64-v8a
+                            mCameraHelper.startPusher(params, new AbstractUVCCameraHandler.OnEncodeResultListener() {
+                                @Override
+                                public void onEncodeResult(byte[] data, int offset, int length, long timestamp, int type) {
+                                    if (type == 1) { // true
+                                        FileUtils.putFileStream(data, offset, length);
+                                    }
+                                    // type = 0,aac audio stream
+                                    if(type == 0) { // false
+                                        // FileUtils.putFileStream(data, offset, length);
+                                        FileUtils.putFileStream(data);
+                                    }
+                                }
+                                @Override
+                                public void onRecordResult(String videoPath) {
+                                    if(TextUtils.isEmpty(videoPath)) {
+                                        return;
+                                    }
+                                }
+                            });}
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             });
+
         }
     }
 
@@ -168,7 +300,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
 
     private void addView(String id, MediaStream stream) {
-        SurfaceViewRenderer renderer = new SurfaceViewRenderer(ChatRoomActivity.this);
+        SurfaceViewRenderer renderer = new SurfaceViewRenderer(getApplicationContext());
         renderer.init(rootEglBase.getEglBaseContext(), null);
         renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
         renderer.setMirror(false);
@@ -197,21 +329,28 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
     @Override  // 屏蔽返回键
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return keyCode == KeyEvent.KEYCODE_BACK || super.onKeyDown(keyCode, event);
+        //return keyCode == KeyEvent.KEYCODE_BACK || super.onKeyDown(keyCode, event);
+        if(keyCode == KeyEvent.KEYCODE_BACK) { //监控/拦截/屏蔽返回键
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
     protected void onDestroy() {
-        if(PrefSingleton.getInstance().getInt("video") == 2) {
-            PrefSingleton.getInstance().putBoolean("USB_Camera",false);
-            FileUtils.releaseFile();
-            mCameraHelper.closeCamera();
-            if (mCameraHelper != null) {
-                mCameraHelper.release();
-            }
-        }
-        exit();
+        hangUp();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onPause(){
+        Count += 1;
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     // 切换摄像头
@@ -224,19 +363,29 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         if(PrefSingleton.getInstance().getInt("video") == 2) {
             PrefSingleton.getInstance().putBoolean("USB_Camera",false);
             FileUtils.releaseFile();
+            if (PrefSingleton.getInstance().getBoolean("recorder_mode")){
+                mCameraHelper.stopPusher();
+            }
             mCameraHelper.closeCamera();
             if (mCameraHelper != null) {
                 mCameraHelper.release();
             }
         }
-        exit();
+        Room_exit();
         this.finish();
+
+        // 跳转主界面
+        if (Count != 0) {
+            Intent intent = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
     }
+    private int Count = 0;
 
     // 静音
     public void toggleMic(boolean enable) {
-        manager.toggleMute(enable); // 静音
-        manager.toggleSpeaker(enable); // 非免提
+        manager.toggleMute(enable);
     }
 
     // 免提
@@ -251,7 +400,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         }
     }
 
-    private void exit() {
+    private void Room_exit() {
         if (manager != null) {
             manager.exitRoom();
         }

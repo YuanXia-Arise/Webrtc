@@ -14,15 +14,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import androidx.annotation.NonNull;
-
-import com.TxtOverlay;
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.Size;
 import com.serenegiant.usb.USBMonitor;
@@ -38,6 +34,7 @@ import com.serenegiant.usb.encoder.biz.H264EncodeConsumer;
 import com.serenegiant.usb.encoder.biz.Mp4MediaMuxer;
 import com.serenegiant.usb.widget.CameraViewInterface;
 
+import org.easydarwin.sw.TxtOverlay;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,9 +52,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
-
-import static androidx.core.math.MathUtils.clamp;
 
 /**
  * Camera业务处理抽象类
@@ -227,10 +221,9 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     // while preview is still running.
                     // therefore this method will take a time to execute
                     try {
-                        //thread.mSync.wait();
-                        thread.mSync.wait(200);
+                        thread.mSync.wait();
                     } catch (final InterruptedException e) {
-                    } catch (Exception e){}
+                    }
                 }
             }
         }
@@ -319,6 +312,10 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 return camera.getBrightness();
             } else if (flag == UVCCamera.PU_CONTRAST) {
                 return camera.getContrast();
+            } else if (flag == UVCCamera.PU_SHARPNESS) {
+                return camera.getSharpness();
+            } else if (flag == UVCCamera.PU_GAIN) {
+                return camera.getGain();
             }
         }
         throw new IllegalStateException();
@@ -335,6 +332,12 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             } else if (flag == UVCCamera.PU_CONTRAST) {
                 camera.setContrast(value);
                 return camera.getContrast();
+            } else if (flag == UVCCamera.PU_SHARPNESS) {
+                camera.setSharpness(value);
+                return camera.getSharpness();
+            } else if (flag == UVCCamera.PU_GAIN) {
+                camera.setGain(value);
+                return camera.getGain();
             }
         }
         throw new IllegalStateException();
@@ -564,9 +567,9 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     return;
                 }
             }
-            if (surface instanceof SurfaceHolder) {
+            /*if (surface instanceof SurfaceHolder) {
                 mUVCCamera.setPreviewDisplay((SurfaceHolder) surface);
-            }
+            }*/
             if (surface instanceof Surface) {
                 mUVCCamera.setPreviewDisplay((Surface) surface);
             } else {
@@ -585,7 +588,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             if (mIsPreviewing) {
                 if (mUVCCamera != null) {
                     mUVCCamera.stopPreview();
-                    mUVCCamera.setFrameCallback(null, 0);
+                    mUVCCamera.setFrameCallback(null, 1);
                 }
                 synchronized (mSync) {
                     mIsPreviewing = false;
@@ -809,19 +812,17 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             this.picPath = picPath;
         }
 
-
         private final IFrameCallback mIFrameCallback = new IFrameCallback() {
             @Override
             public void onFrame(final ByteBuffer frame) {
-//				final MediaVideoBufferEncoder videoEncoder;
-//				synchronized (mSync) {
-//					videoEncoder = mVideoEncoder;
-//				}
-//				if (videoEncoder != null) {
-//					videoEncoder.frameAvailableSoon();
-//					videoEncoder.encode(frame);
-//				}
-
+				final MediaVideoBufferEncoder videoEncoder;
+				synchronized (mSync) {
+					videoEncoder = mVideoEncoder;
+				}
+				if (videoEncoder != null) {
+					videoEncoder.frameAvailableSoon();
+					videoEncoder.encode(frame);
+				}
                 int len = frame.capacity();
                 final byte[] yuv = new byte[len];
                 frame.get(yuv);
@@ -829,8 +830,8 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                 if (mPreviewListener != null) {
                     mPreviewListener.onPreviewResult(yuv);
                 }
-                // picture
-                if (isCaptureStill && !TextUtils.isEmpty(picPath)) {
+
+                /*if (isCaptureStill && !TextUtils.isEmpty(picPath)) { // picture
                     isCaptureStill = false;
                     new Thread(new Runnable() {
                         @Override
@@ -838,12 +839,12 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                             saveYuv2Jpeg(picPath, yuv);
                         }
                     }).start();
-                }
-                // video
-                if (mH264Consumer != null) {
+                }*/
+
+                if (mH264Consumer != null) { // video
                     // overlay
                     if(isSupportOverlay) {
-                        TxtOverlay.getInstance().overlay(yuv, new SimpleDateFormat("yyyy-MM-dd EEEE HH:mm:ss").format(new Date()));
+                        TxtOverlay.getInstance().overlay(yuv, new SimpleDateFormat("yyyy年MM月dd日HH时mm分ss秒").format(new Date()));
                     }
                     mH264Consumer.setRawYuv(yuv, mWidth, mHeight);
                 }
@@ -855,7 +856,6 @@ public abstract class AbstractUVCCameraHandler extends Handler {
             ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
             boolean result = yuvImage.compressToJpeg(new Rect(0, 0, mWidth, mHeight), 100, bos);
             if (result) {
-
                 byte[] buffer = bos.toByteArray();
                 File file = new File(path);
                 FileOutputStream fos = null;
@@ -983,57 +983,9 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     mListener.onEncodeResult(data, offset, length, timestamp, type);
                 }
             }
+
         };
 
-//		private void loadShutterSound(final Context context) {
-//			// get system stream type using reflection
-//			int streamType;
-//			try {
-//				final Class<?> audioSystemClass = Class.forName("android.media.AudioSystem");
-//				final Field sseField = audioSystemClass.getDeclaredField("STREAM_SYSTEM_ENFORCED");
-//				streamType = sseField.getInt(null);
-//			} catch (final Exception e) {
-//				streamType = AudioManager.STREAM_SYSTEM;	// set appropriate according to your app policy
-//			}
-//			if (mSoundPool != null) {
-//				try {
-//					mSoundPool.release();
-//				} catch (final Exception e) {
-//				}
-//				mSoundPool = null;
-//			}
-//			// load shutter sound from resource
-//			mSoundPool = new SoundPool(2, streamType, 0);
-//			mSoundId = mSoundPool.load(context, R.raw.camera_click, 1);
-//		}
-
-        /**
-         * prepare and load shutter sound for still image capturing
-         */
-        @SuppressWarnings("deprecation")
-//		private void loadShutterSound(final Context context) {
-//	    	// get system stream type using reflection
-//	        int streamType;
-//	        try {
-//	            final Class<?> audioSystemClass = Class.forName("android.media.AudioSystem");
-//	            final Field sseField = audioSystemClass.getDeclaredField("STREAM_SYSTEM_ENFORCED");
-//	            streamType = sseField.getInt(null);
-//	        } catch (final Exception e) {
-//	        	streamType = AudioManager.STREAM_SYSTEM;	// set appropriate according to your app policy
-//	        }
-//	        if (mSoundPool != null) {
-//	        	try {
-//	        		mSoundPool.release();
-//	        	} catch (final Exception e) {
-//	        	}
-//	        	mSoundPool = null;
-//	        }
-//	        // load shutter sound from resource
-//		    mSoundPool = new SoundPool(2, streamType, 0);
-//		    mSoundId = mSoundPool.load(context, R.raw.camera_click, 1);
-//		}
-
-        @Override
         public void run() {
             Looper.prepare();
             AbstractUVCCameraHandler handler = null;
@@ -1155,7 +1107,7 @@ public abstract class AbstractUVCCameraHandler extends Handler {
                     callback.onError(e);
                     cameraCallback = callback;
                 }
-            }catch (final Exception e1) {
+            } catch (final Exception e1) {
                 mCallbacks.remove(cameraCallback);
                 Log.w(TAG, e);
             }

@@ -42,7 +42,7 @@ abstract class CameraCapturer implements CameraVideoCapturer {
                     Logging.d(TAG, "Create session done. Switch state: " + switchState);
                     uiThreadHandler.removeCallbacks(openCameraTimeoutRunnable);
                     synchronized (stateLock) {
-                        capturerObserver.onCapturerStarted(true /* success */);
+                        capturerObserver.onCapturerStarted(true);
                         sessionOpening = false;
                         currentSession = session;
                         cameraStatistics = new CameraStatistics(surfaceHelper, eventsHandler);

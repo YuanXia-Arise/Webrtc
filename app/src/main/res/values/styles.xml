@@ -26,5 +26,20 @@
         <item name="android:textColor">@android:color/background_light</item>
     </style>
 
+    //20201214
+    <style name="widget_gender_switch">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textOff">""</item><!-- 此设置不需要文字，只显示背景图的开关 -->
+        <item name="android:textOn">""</item>
+        <item name="android:thumb">@drawable/ic_switch</item><!--滑块格式9.png -->
+        <item name="android:thumbTextPadding">10dp</item><!-- 用来控制背景图片和文字之间的间距来控制switch整体宽度 -->
+        <item name="android:track">@drawable/button_on</item><!-- 背景图的开关 格式9.png-->
+    </style>
+
+    <style name="TabLayoutTextStyle">
+        <item name="android:textSize">18sp</item>
+    </style>
+
 
 </resources>

@@ -298,6 +298,7 @@ public class UVCCameraTextureView extends AspectRatioTextureView    // API >= 14
 					try {
 						mThread.mSync.wait();
 					} catch (final InterruptedException e) {
+					    e.printStackTrace();
 					}
 				}
 			}
@@ -349,7 +350,7 @@ public class UVCCameraTextureView extends AspectRatioTextureView    // API >= 14
 		private static final class RenderThread extends Thread {
 	    	private final Object mSync = new Object();
 	    	private final SurfaceTexture mSurface;
-	    	private RenderHandler mHandler;
+	    	private UVCCameraTextureView.RenderHandler mHandler;
 	    	private EGLBase mEgl;
 	    	/** IEglSurface instance related to this TextureView */
 	    	private EGLBase.IEglSurface mEglSurface;
@@ -374,7 +375,7 @@ public class UVCCameraTextureView extends AspectRatioTextureView    // API >= 14
 	    		setName("RenderThread");
 			}
 
-			public final RenderHandler getHandler() {
+			public final UVCCameraTextureView.RenderHandler getHandler() {
 				if (DEBUG) Log.v(TAG, "RenderThread#getHandler:");
 	            synchronized (mSync) {
 	                // create rendering thread
@@ -426,7 +427,7 @@ public class UVCCameraTextureView extends AspectRatioTextureView    // API >= 14
 			public final void setEncoder(final MediaEncoder encoder) {
 				if (DEBUG) Log.v(TAG, "RenderThread#setEncoder:encoder=" + encoder);
 				if (encoder != null && (encoder instanceof MediaVideoEncoder)) {
-					((MediaVideoEncoder)encoder).setEglContext(mEglSurface.getContext(), mTexId);
+					((MediaVideoEncoder) encoder).setEglContext(mEglSurface.getContext(), mTexId);
 				}
 				mEncoder = encoder;
 			}
@@ -546,7 +547,7 @@ public class UVCCameraTextureView extends AspectRatioTextureView    // API >= 14
 	            init();
 	            Looper.prepare();
 	            synchronized (mSync) {
-	            	mHandler = new RenderHandler(mFpsCounter, this);
+	            	mHandler = new UVCCameraTextureView.RenderHandler(mFpsCounter, this);
 	                mSync.notify();
 	            }
 

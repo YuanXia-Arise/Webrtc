@@ -23,7 +23,6 @@ import android.view.SurfaceView;
  */
 public class SurfaceViewRenderer extends SurfaceView
     implements SurfaceHolder.Callback, VideoSink, RendererCommon.RendererEvents {
-  private static final String TAG = "SurfaceViewRenderer";
 
   // Cached resource name.
   private final String resourceName;
@@ -295,6 +294,6 @@ public class SurfaceViewRenderer extends SurfaceView
   }
 
   private void logD(String string) {
-    Logging.d(TAG, resourceName + ": " + string);
+    System.out.println(resourceName + ": " + string);
   }
 }

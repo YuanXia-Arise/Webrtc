@@ -30,8 +30,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbInterface;
@@ -52,9 +50,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -351,8 +347,8 @@ public final class USBMonitor {
 							break;
 						} else {
 							// collection failed dev's class and subclass
-							String devModel = android.os.Build.MODEL;
-							String devSystemVersion = android.os.Build.VERSION.RELEASE;
+							String devModel = Build.MODEL;
+							String devSystemVersion = Build.VERSION.RELEASE;
 							String devClass = String.valueOf(device.getDeviceClass());
 							String subClass = String.valueOf(device.getDeviceSubclass());
 							try{
@@ -1302,6 +1298,7 @@ public final class USBMonitor {
 		 * @return
 		 * @throws IllegalStateException
 		 */
+		@SuppressLint("NewApi")
 		public synchronized UsbInterface getInterface(final int interface_id, final int altsetting) throws IllegalStateException {
 			checkConnection();
 			SparseArray<UsbInterface> intfs = mInterfaces.get(interface_id);

@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 
-
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -47,7 +46,6 @@ public class H264EncodeConsumer extends Thread {
     private MediaFormat newFormat;
     private WeakReference<Mp4MediaMuxer> mMuxerRef;
     private boolean isAddKeyFrame = false;
-
 
     public interface OnH264EncodeResultListener {
         void onEncodeResult(byte[] data, int offset,
@@ -181,7 +179,7 @@ public class H264EncodeConsumer extends Thread {
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 
                     boolean sync = false;
-                    if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {// sps
+                    if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) { // sps
                         sync = (bufferInfo.flags & MediaCodec.BUFFER_FLAG_SYNC_FRAME) != 0;
                         if (!sync) {
                             byte[] temp = new byte[bufferInfo.size];
@@ -201,11 +199,9 @@ public class H264EncodeConsumer extends Thread {
                     if (sync) {
                         System.arraycopy(mPpsSps, 0, h264, 0, mPpsSps.length);
                         outputBuffer.get(h264, mPpsSps.length, bufferInfo.size);
-
-                        //mEasyPusher.push(h264, 0, mPpsSps.length + bufferInfo.size, bufferInfo.presentationTimeUs / 1000, 2);
-
                         if (listener != null) {
-                            listener.onEncodeResult(h264, 0, mPpsSps.length + bufferInfo.size, bufferInfo.presentationTimeUs / 1000);
+                            listener.onEncodeResult(h264, 0, mPpsSps.length + bufferInfo.size,
+                                    bufferInfo.presentationTimeUs / 1000);
                         }
 
                         // 添加视频流到混合器
@@ -221,7 +217,6 @@ public class H264EncodeConsumer extends Thread {
                                     + "  bufferInfo.size = " + bufferInfo.size);
                     } else {
                         outputBuffer.get(h264, 0, bufferInfo.size);
-                        //mEasyPusher.push(h264, 0, bufferInfo.size, bufferInfo.presentationTimeUs / 1000, 1);
                         if (listener != null) {
                             listener.onEncodeResult(h264, 0, bufferInfo.size, bufferInfo.presentationTimeUs / 1000);
                         }
@@ -364,9 +359,9 @@ public class H264EncodeConsumer extends Thread {
 
     static {
         recognizedFormats = new int[]{
-//                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar,
-//                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar,
-//                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar,
+                //MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar,
+                //MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar,
+                //MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar,
                 MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar,
                 MediaCodecInfo.CodecCapabilities.COLOR_QCOM_FormatYUV420SemiPlanar,
         };

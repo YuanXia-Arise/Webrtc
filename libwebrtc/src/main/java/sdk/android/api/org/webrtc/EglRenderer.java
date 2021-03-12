@@ -12,6 +12,7 @@ package org.webrtc;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
@@ -22,11 +23,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.Surface;
+
+import com.google.gson.Gson;
 
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -168,7 +175,7 @@ public class EglRenderer implements VideoSink {
   private final Runnable logStatisticsRunnable = new Runnable() {
     @Override
     public void run() {
-      logStatistics();
+      //logStatistics(); // 20201201
       synchronized (handlerLock) {
         if (renderThreadHandler != null) {
           renderThreadHandler.removeCallbacks(logStatisticsRunnable);
@@ -437,7 +444,7 @@ public class EglRenderer implements VideoSink {
    *                 It should be lightweight and must not call removeFrameListener.
    * @param scale    The scale of the Bitmap passed to the callback, or 0 if no Bitmap is
    *                 required.
-   * @param drawer   Custom drawer to use for this frame listener or null to use the default one.
+   * @param drawerParam   Custom drawer to use for this frame listener or null to use the default one.
    */
   public void addFrameListener(
       final FrameListener listener, final float scale, final RendererCommon.GlDrawer drawerParam) {
@@ -451,7 +458,7 @@ public class EglRenderer implements VideoSink {
    *                 It should be lightweight and must not call removeFrameListener.
    * @param scale    The scale of the Bitmap passed to the callback, or 0 if no Bitmap is
    *                 required.
-   * @param drawer   Custom drawer to use for this frame listener or null to use the default one.
+   * @param drawerParam   Custom drawer to use for this frame listener or null to use the default one.
    * @param applyFpsReduction This callback will not be called for frames that have been dropped by
    *                          FPS reduction.
    */
@@ -469,7 +476,7 @@ public class EglRenderer implements VideoSink {
    * the queue, nothing happens. It is ensured that callback won't be called after this method
    * returns.
    *
-   * @param runnable The callback to remove.
+   * @param listener The callback to remove.
    */
   public void removeFrameListener(final FrameListener listener) {
     final CountDownLatch latch = new CountDownLatch(1);
@@ -670,10 +677,10 @@ public class EglRenderer implements VideoSink {
         renderSwapBufferTimeNs += (currentTimeNs - swapBuffersStartTimeNs);
       }
     }
-
     notifyCallbacks(frame, shouldRenderFrame);
     frame.release();
   }
+
 
   private void notifyCallbacks(VideoFrame frame, boolean wasRendered) {
     if (frameListeners.isEmpty())
@@ -707,10 +714,10 @@ public class EglRenderer implements VideoSink {
       GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0,
           GLES20.GL_TEXTURE_2D, bitmapTextureFramebuffer.getTextureId(), 0);
 
-      GLES20.glClearColor(0 /* red */, 0 /* green */, 0 /* blue */, 0 /* alpha */);
+      GLES20.glClearColor(0, 0, 0, 0);
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-      frameDrawer.drawFrame(frame, listenerAndParams.drawer, drawMatrix, 0 /* viewportX */,
-          0 /* viewportY */, scaledWidth, scaledHeight);
+      frameDrawer.drawFrame(frame, listenerAndParams.drawer, drawMatrix, 0,
+          0, scaledWidth, scaledHeight);
 
       final ByteBuffer bitmapBuffer = ByteBuffer.allocateDirect(scaledWidth * scaledHeight * 4);
       GLES20.glViewport(0, 0, scaledWidth, scaledHeight);

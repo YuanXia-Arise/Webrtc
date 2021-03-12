@@ -1,4 +1,4 @@
-package com;
+package org.easydarwin.sw;
 
 /**
  */

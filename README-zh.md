@@ -1,118 +1,67 @@
-# video conference
-![logo](https://github.com/ddssingsong/webrtc_android/blob/master/art/logo1.png)
+# com.webrtc
+v1.0.1 1.集成UVC采集视频；
+       2.采集视频回传帧视频传入webrtc,实现一对一视频；
+       3.项目瘦身，去除多余代码
 
-## 概述
+v1.1.1 集成meeting 群聊模块
 
-> [English Documents](<https://github.com/ddssingsong/webrtc_android/blob/master/README.md>)
+v1.1.2 处理UVC视频流交互崩溃问题
 
-基于 [webrtc](https://webrtc.googlesource.com/) 开发的一套可以进行**单路**或者**多路**语音、视频的系统。高仿微信九宫格显示，最多可支持 **9** 路视频。
+v1.1.3 Apk瘦身
 
+v1.1.4 功能优化
 
+v1.1.5 1.优化USB camera灰度耗时;
+       2.解决Android P之后调用Cameara Api 设置灰度效果无效问题;
+       3.ch34x设备连接优化;
+       4.web_socket连接服务器故障问题处理，增加用户提示
+       
+v1.2.1 CH34x库修改,修改ch34x连接后断开提示弹窗
 
-通过这个项目，你可以深刻学习并理解webrtc通话的整个流程。这个项目只是作为学习使用，是一个很好的webrtc入门项目，如果你感兴趣的话，赶紧开始吧
+v1.2.2 1.ch34x websocket 断开自动重连；
+       2.新增自动对焦、免提控制按钮；
+       3.拨号界面新增麦克风、免提控制开关
 
+v1.2.3 1.部分手机设备视频未全屏显示问题；
+       2.新增进度条控制变焦
 
+v1.3.1 1.camera 音视频录制；
+       2.uvc_CAMERA 视频录制
 
-## 服务器搭建
+v1.3.2 1.UVC_Camera 画面显示拉伸问题；
+       2.录制选择功能switch添加；
+       3.键鼠优化
+       
+v1.3.3 1.ch34设备离线弹窗阉割
+       2.识别ch34设备，自动连接
+       3.键鼠websocket连接，服务器连接异常故障问题处理
+       4.拨号/挂断视频源传输问题
 
+v1.3.4 1.主页新增设备码显示
+       2.websocket重写
+       3.设备序列号，调用Android_id，处理成纯数字，截取10位
+       4.Switch开关按键，添加状态标签
 
-nodejs：https://github.com/ddssingsong/webrtc_server_node    for branch:branch_meeting(会议)
+v1.3.5 1.菜单键返回视频页，挂断退出应用问题
 
-java： https://github.com/ddssingsong/webrtc_server_java     for branch:master
+v1.3.6 1.修复菜单键返回拨号页后，点击挂断视频，直接退出应用BUG
+       2.视频录制，音频问题
 
+v1.3.7 取消默认配置服务器地址，服务器地址需设置界面输入
 
-如果需要详细的部署流程可参考博客
+v1.4.1 1.启动页计算器
+       2.设备静音模式
+       3.加入启动页，原逻辑修改
 
-https://blog.csdn.net/u011077027/article/details/86225524  （csdn）
+v1.4.2 1.首页时间水印选项开关
+       2.视频传输添加时间水印(无法添加，只能回调添加，导致视频帧率下降，有所卡顿)
+       3.视频录制添加水印(同上 MediaMuxer编码)
 
+v1.4.3 1.时间水印耗时优化
+       2.视频源2添加时间水印
 
+v1.4.4 1.一键静音功能导致的崩溃BUG
+       2.视频拨号，后台不保活
+       3.低流量模式下，录制时间水印视频，数据冲突问题
 
-## 实现功能
-
-- 已实现功能：
-  1. 支持一对一语音和视频
-  2. 支持多对多语音和视频会议
-  3. 灵活替换wss信令服务器和stun/turn转发穿透服务器
-  4. 动态权限申请
-  5. 切换摄像头、免提、开启静音、关闭视频保留声音
-  6. 呼叫、响铃、拨打电话的整个流程
-  7. 将信令模块和UI提取出来，将核心代码封装成SDK
-
-- 正在开发的功能：
-  1. 各种优化，使用体验啥的
-  2. 2.0.0_preview 正在开发中
-  
-     
-
-## 实现效果展示
-
-1. 单人通话
-
-   ![process](art/image3.png)
-
-
-
-2. 多人会话
-
-   ![process](/art/image5.jpg)
-
-
-
-## 更新日志
-
-**v1.2.0**
-
-使用androidx
-
-**v1.1.2** 
-
- 新增功能：
-
-1. 仿微信九宫格
-2. 会议添加扬声器和关闭摄像头功能
-
-**v1.1.1** 
-
-保存代码，便于后续的开发
-
-**v1.1.0**  
-
-完成基本视频会议
-
-# demo测试
-
-apk:[Android端测试](app/release/app-release.apk)
-
-
-## 借鉴
-
-2. https://github.com/LingyuCoder/SkyRTC
-
-   服务端和网页端的实现基于此修改
-   
-2. https://webrtc.org/
-
-   webrtc网站
-
-3. https://webrtc.googlesource.com/src/+/master/examples
-
-   google git demo
-
-webrtc源码编译时间：2019年4月
-
-## License
-
-MIT License 
-Copyright (c) 2019 哒哒瑟 
-
-
-
-## 共同探索
-
-QQ群名称：webrtc技术交流群
-
-QQ群   号：601332720
-           619413989 （2群）
-
-
-加入群一起探讨webrtc，分享好的开源项目
+v1.4.5 内存优化

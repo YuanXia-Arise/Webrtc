@@ -32,9 +32,11 @@ public class PrefSingleton {
     }
 
     public void putInt(String key, int value) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putInt(key, value);
-        editor.commit();
+        try {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putInt(key, value);
+            editor.commit();
+        } catch (NullPointerException e){}
     }
 
     public long getLong(String key) {
@@ -63,9 +65,11 @@ public class PrefSingleton {
     }
 
     public void putString(String key, String value) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(key, value);
-        editor.commit();
+        try {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString(key, value);
+            editor.commit();
+        } catch (NullPointerException e){}
     }
 
     public Boolean getBoolean(String key) {
@@ -74,9 +78,11 @@ public class PrefSingleton {
     }
 
     public void putBoolean(String key, Boolean value) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(key, value);
-        editor.commit();
+        try {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putBoolean(key, value);
+            editor.commit();
+        } catch (NullPointerException e){}
     }
 
     //移除存储类的中数据

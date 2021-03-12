@@ -40,7 +40,6 @@ import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.Spinner;
 
-
 import com.dds.libusbcamera.R;
 
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class CameraDialog extends DialogFragment {
 		public USBMonitor getUSBMonitor();
 		public void onDialogResult(boolean canceled);
 	}
-	
+
 	/**
 	 * Helper method
 	 * @param parent FragmentActivity

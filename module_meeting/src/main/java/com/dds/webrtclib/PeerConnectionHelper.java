@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.dds.webrtclib.bean.MyIceServer;
 import com.dds.webrtclib.ws.IWebSocket;
 import com.google.gson.Gson;
+import com.serenegiant.usb.encoder.biz.Mp4MediaMuxer;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -251,7 +252,7 @@ public class PeerConnectionHelper {
         audioSource = _factory.createAudioSource(createAudioConstraints());
         _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
 
-        if (PrefSingleton.getInstance().getBoolean("voice_mode")) {
+        /*if (PrefSingleton.getInstance().getBoolean("voice_mode")) {
             toggleMute(true);
             toggleSpeaker(true);
             //_localAudioTrack.setEnabled(true);
@@ -259,6 +260,17 @@ public class PeerConnectionHelper {
             toggleMute(false);
             toggleSpeaker(false);
             //_localAudioTrack.setEnabled(false);
+        }*/
+
+        if (PrefSingleton.getInstance().getBoolean("voice_mode")) {
+            toggleMute(true);
+        } else {
+            toggleMute(false);
+        }
+        if (PrefSingleton.getInstance().getBoolean("speak_mode")) {
+            toggleSpeaker(true);
+        } else {
+            toggleSpeaker(false);
         }
         _localStream.addTrack(_localAudioTrack);
 
@@ -459,14 +471,16 @@ public class PeerConnectionHelper {
     private VideoCapturer createVideoCapture() {
         VideoCapturer videoCapturer;
         /*if (useCamera2()) {
-            System.out.println("3333==0");
             videoCapturer = createCameraCapture(new Camera2Enumerator(_context));
         } else {
-            System.out.println("3333==1");
             videoCapturer = createCameraCapture(new Camera1Enumerator(true));
-        }*/
-        videoCapturer = createCameraCapture(new Camera1Enumerator(false));
-        return videoCapturer;
+        }
+        return videoCapturer;*/
+        boolean Recoder = PrefSingleton.getInstance().getBoolean("recorder_mode");
+        boolean Water = PrefSingleton.getInstance().getBoolean("water_mode");
+        if ((!Recoder && !Water) || (Recoder && !Water)) return createCameraCapture(new Camera1Enumerator(true));
+        if ((!Recoder && Water) || (Recoder && Water)) return createCameraCapture(new Camera1Enumerator(false));
+        return null;
     }
 
     private VideoCapturer createCameraCapture(CameraEnumerator enumerator) {
@@ -476,7 +490,6 @@ public class PeerConnectionHelper {
         /*for (String deviceName : deviceNames) {
             if (enumerator.isFrontFacing(deviceName)) {
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
-
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
@@ -487,7 +500,6 @@ public class PeerConnectionHelper {
         for (String deviceName : deviceNames) {
             if (!enumerator.isFrontFacing(deviceName)) {
                 VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
-
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
@@ -573,13 +585,11 @@ public class PeerConnectionHelper {
         @Override
         public void onIceConnectionReceivingChange(boolean b) {
             Log.i(TAG, "onIceConnectionReceivingChange:" + b);
-
         }
 
         @Override
         public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
             Log.i(TAG, "onIceGatheringChange:" + iceGatheringState.toString());
-
         }
 
 
@@ -787,14 +797,14 @@ public class PeerConnectionHelper {
                 height_usb = 1080;
                 break;
             case 2:
-                VIDEO_RESOLUTION_WIDTH = 680;
-                VIDEO_RESOLUTION_HEIGHT = 1080;
+                VIDEO_RESOLUTION_WIDTH = 1080;
+                VIDEO_RESOLUTION_HEIGHT = 680;
                 width_usb = 1920;
                 height_usb = 1080;
                 break;
             case 3:
-                VIDEO_RESOLUTION_WIDTH = 680;
-                VIDEO_RESOLUTION_HEIGHT = 1920;
+                VIDEO_RESOLUTION_WIDTH = 1920;
+                VIDEO_RESOLUTION_HEIGHT = 680;
                 width_usb = 1920;
                 height_usb = 1080;
                 break;

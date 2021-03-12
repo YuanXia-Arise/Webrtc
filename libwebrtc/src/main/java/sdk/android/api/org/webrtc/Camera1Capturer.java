@@ -11,6 +11,9 @@
 package org.webrtc;
 
 import android.content.Context;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 
 public class Camera1Capturer extends CameraCapturer {
@@ -23,6 +26,7 @@ public class Camera1Capturer extends CameraCapturer {
     this.captureToTexture = captureToTexture;
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.O)
   @Override
   protected void createCameraSession(CameraSession.CreateSessionCallback createSessionCallback,
       CameraSession.Events events, Context applicationContext,

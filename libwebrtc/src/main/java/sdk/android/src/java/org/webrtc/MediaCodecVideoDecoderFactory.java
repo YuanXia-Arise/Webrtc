@@ -110,7 +110,6 @@ class MediaCodecVideoDecoderFactory implements VideoDecoderFactory {
                 return info;
             }
         }
-
         return null; // No support for this type.
     }
 

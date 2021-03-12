@@ -1,18 +1,25 @@
 package com.dds.webrtclib.ws;
 
 import android.annotation.SuppressLint;
+import android.app.LauncherActivity;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.dds.webrtclib.WebRTCManager;
+import com.dds.webrtclib.bean.MediaType;
+import com.dds.webrtclib.ui.ChatRoomActivity;
+import com.google.gson.Gson;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.webrtc.IceCandidate;
+import org.webrtc.PrefSingleton;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
@@ -60,6 +67,7 @@ public class JavaWebSocket implements IWebSocket {
             mWebSocketClient = new WebSocketClient(uri) {
                 @Override
                 public void onOpen(ServerHandshake handshake) {
+                    Log.e(TAG, "onOpen:");
                     isOpen = true;
                     events.onWebSocketOpen();
                 }
@@ -202,13 +210,13 @@ public class JavaWebSocket implements IWebSocket {
         String eventName = (String) map.get("eventName");
         if (eventName == null) return;
         if (eventName.equals("_peers")) {
-            handleJoinToRoom(map);
+            handleJoinToRoom(map); // 拨号进入房间
         }
         if (eventName.equals("_new_peer")) {
-            handleRemoteInRoom(map);
+            handleRemoteInRoom(map); // 接收者进入房间
         }
         if (eventName.equals("_ice_candidate")) {
-            handleRemoteCandidate(map);
+            handleRemoteCandidate(map); // 处理交互信息
         }
         if (eventName.equals("_remove_peer")) {
             handleRemoteOutRoom(map);

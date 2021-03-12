@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/wr_background"
+    android:orientation="vertical">
+    
+    <FrameLayout
+        android:id="@+id/wr_video_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:elevation="2dp"/>
+
+    <!--<FrameLayout
+        android:id="@+id/wr_container"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"/>-->
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:elevation="1dp">
+
+        <com.serenegiant.usb.widget.UVCCameraTextureView
+            android:id="@+id/camera_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:rotation="0" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="67.2dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:background="@drawable/rectangle"
+        android:elevation="3dp">
+
+        <!--<ImageView
+            android:layout_width="54dp"
+            android:layout_height="54dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ic_cancel" />-->
+
+        <ImageButton
+            android:id="@+id/DisCalling"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/ic_cancel"/>
+
+        <ImageButton
+            android:id="@+id/Voiceing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/DisCalling"
+            android:layout_marginRight="30dp"
+            android:background="@drawable/ic_voiceing"/>
+
+        <ImageButton
+            android:id="@+id/Speaking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/DisCalling"
+            android:layout_marginLeft="30dp"
+            android:background="@drawable/ic_speaking"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_contrast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="90dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:orientation="horizontal"
+        android:elevation="3dp"
+        android:visibility="invisible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="7dp"
+            android:paddingTop="7dp"
+            android:text="变焦(zoom)"
+            android:textColor="#ffffff" />
+
+        <SeekBar
+            android:id="@+id/seekbar_contrast"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <!--android:progressDrawable="@drawable/seekbar_bg"-->
+        <!--//这里设置seekbar的进度条颜色
+        android:progressDrawable="@drawable/bg_adjust_seek_bar"
+        //这里设置seekbar的按钮图片
+        android:thumb="@drawable/bg_seek_bar_thumb2"-->
+    </LinearLayout>
+
+</RelativeLayout>

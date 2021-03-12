@@ -44,8 +44,8 @@ public class UVCCamera {
 	private static final String TAG = UVCCamera.class.getSimpleName();
 	private static final String DEFAULT_USBFS = "/dev/bus/usb";
 
-	public static final int DEFAULT_PREVIEW_WIDTH = 1920;
-	public static final int DEFAULT_PREVIEW_HEIGHT = 1080;
+	public static final int DEFAULT_PREVIEW_WIDTH = 640;
+	public static final int DEFAULT_PREVIEW_HEIGHT = 480;
 	public static final int DEFAULT_PREVIEW_MODE = 0;
 	public static final int DEFAULT_PREVIEW_MIN_FPS = 1;
 	public static final int DEFAULT_PREVIEW_MAX_FPS = 31;
@@ -134,8 +134,29 @@ public class UVCCamera {
     protected List<Size> mCurrentSizeList;
 	// these fields from here are accessed from native code and do not change name and remove
     protected long mNativePtr;
+    protected int mScanningModeMin, mScanningModeMax, mScanningModeDef;
+    protected int mExposureModeMin, mExposureModeMax, mExposureModeDef;
+    protected int mExposurePriorityMin, mExposurePriorityMax, mExposurePriorityDef;
+    protected int mExposureMin, mExposureMax, mExposureDef;
+    protected int mAutoFocusMin, mAutoFocusMax, mAutoFocusDef;
     protected int mFocusMin, mFocusMax, mFocusDef;
+    protected int mFocusRelMin, mFocusRelMax, mFocusRelDef;
+    protected int mFocusSimpleMin, mFocusSimpleMax, mFocusSimpleDef;
+    protected int mIrisMin, mIrisMax, mIrisDef;
+    protected int mIrisRelMin, mIrisRelMax, mIrisRelDef;
+    protected int mPanMin, mPanMax, mPanDef;
+    protected int mTiltMin, mTiltMax, mTiltDef;
+    protected int mRollMin, mRollMax, mRollDef;
+    protected int mPanRelMin, mPanRelMax, mPanRelDef;
+    protected int mTiltRelMin, mTiltRelMax, mTiltRelDef;
+    protected int mRollRelMin, mRollRelMax, mRollRelDef;
+    protected int mPrivacyMin, mPrivacyMax, mPrivacyDef;
+    protected int mAutoWhiteBlanceMin, mAutoWhiteBlanceMax, mAutoWhiteBlanceDef;
+    protected int mAutoWhiteBlanceCompoMin, mAutoWhiteBlanceCompoMax, mAutoWhiteBlanceCompoDef;
     protected int mWhiteBlanceMin, mWhiteBlanceMax, mWhiteBlanceDef;
+    protected int mWhiteBlanceCompoMin, mWhiteBlanceCompoMax, mWhiteBlanceCompoDef;
+    protected int mWhiteBlanceRelMin, mWhiteBlanceRelMax, mWhiteBlanceRelDef;
+    protected int mBacklightCompMin, mBacklightCompMax, mBacklightCompDef;
     protected int mBrightnessMin, mBrightnessMax, mBrightnessDef;
     protected int mContrastMin, mContrastMax, mContrastDef;
     protected int mSharpnessMin, mSharpnessMax, mSharpnessDef;
@@ -144,6 +165,13 @@ public class UVCCamera {
     protected int mSaturationMin, mSaturationMax, mSaturationDef;
     protected int mHueMin, mHueMax, mHueDef;
     protected int mZoomMin, mZoomMax, mZoomDef;
+    protected int mZoomRelMin, mZoomRelMax, mZoomRelDef;
+    protected int mPowerlineFrequencyMin, mPowerlineFrequencyMax, mPowerlineFrequencyDef;
+    protected int mMultiplierMin, mMultiplierMax, mMultiplierDef;
+    protected int mMultiplierLimitMin, mMultiplierLimitMax, mMultiplierLimitDef;
+    protected int mAnalogVideoStandardMin, mAnalogVideoStandardMax, mAnalogVideoStandardDef;
+    protected int mAnalogVideoLockStateMin, mAnalogVideoLockStateMax, mAnalogVideoLockStateDef;
+    // until here
     /**
      * the sonctructor of this class should be call within the thread that has a looper
      * (UI thread or a thread that called Looper.prepare)
@@ -169,7 +197,7 @@ public class UVCCamera {
 				mCtrlBlock.getBusNum(),
 				mCtrlBlock.getDevNum(),
 				getUSBFSName(mCtrlBlock));
-			sb.append("调用nativeConnect返回值：" + result);
+			sb.append("调用nativeConnect返回值："+result);
 //			long id_camera, int venderId, int productId, int fileDescriptor, int busNum, int devAddr, String usbfs
 		} catch (final Exception e) {
 			Log.w(TAG, e);
@@ -196,6 +224,26 @@ public class UVCCamera {
 			DEFAULT_PREVIEW_MIN_FPS, DEFAULT_PREVIEW_MAX_FPS, DEFAULT_PREVIEW_MODE, DEFAULT_BANDWIDTH);
     }
 
+	/**
+	 * set status callback
+	 * @param callback
+	 */
+	public void setStatusCallback(final IStatusCallback callback) {
+		if (mNativePtr != 0) {
+			nativeSetStatusCallback(mNativePtr, callback);
+		}
+	}
+
+	/**
+	 * set button callback
+	 * @param callback
+	 */
+	public void setButtonCallback(final IButtonCallback callback) {
+		if (mNativePtr != 0) {
+			nativeSetButtonCallback(mNativePtr, callback);
+		}
+	}
+
     /**
      * close and release UVC camera
      */
@@ -203,7 +251,7 @@ public class UVCCamera {
     	stopPreview();
     	if (mNativePtr != 0) {
     		nativeRelease(mNativePtr);
-    		//mNativePtr = 0;
+//    		mNativePtr = 0;	// nativeDestroyを呼ぶのでここでクリアしちゃダメ
     	}
     	if (mCtrlBlock != null) {
 			mCtrlBlock.close();
@@ -221,9 +269,60 @@ public class UVCCamera {
 		return mCtrlBlock != null ? mCtrlBlock.getDevice() : null;
 	}
 
+	public String getDeviceName(){
+		return mCtrlBlock != null ? mCtrlBlock.getDeviceName() : null;
+	}
+
+	public UsbControlBlock getUsbControlBlock() {
+		return mCtrlBlock;
+	}
+
 	public synchronized String getSupportedSize() {
     	return !TextUtils.isEmpty(mSupportedSize) ? mSupportedSize : (mSupportedSize = nativeGetSupportedSize(mNativePtr));
     }
+
+	public Size getPreviewSize() {
+		Size result = null;
+		final List<Size> list = getSupportedSizeList();
+		for (final Size sz: list) {
+			if ((sz.width == mCurrentWidth)
+				|| (sz.height == mCurrentHeight)) {
+				result =sz;
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Set preview size and preview mode
+	 * @param width
+	   @param height
+	 */
+	public void setPreviewSize(final int width, final int height) {
+		setPreviewSize(width, height, DEFAULT_PREVIEW_MIN_FPS, DEFAULT_PREVIEW_MAX_FPS, mCurrentFrameFormat, mCurrentBandwidthFactor);
+	}
+
+	/**
+	 * Set preview size and preview mode
+	 * @param width
+	 * @param height
+	 * @param frameFormat either FRAME_FORMAT_YUYV(0) or FRAME_FORMAT_MJPEG(1)
+	 */
+	public void setPreviewSize(final int width, final int height, final int frameFormat) {
+		setPreviewSize(width, height, DEFAULT_PREVIEW_MIN_FPS, DEFAULT_PREVIEW_MAX_FPS, frameFormat, mCurrentBandwidthFactor);
+	}
+
+	/**
+	 * Set preview size and preview mode
+	 * @param width
+	   @param height
+	   @param frameFormat either FRAME_FORMAT_YUYV(0) or FRAME_FORMAT_MJPEG(1)
+	   @param bandwidth [0.0f,1.0f]
+	 */
+	public void setPreviewSize(final int width, final int height, final int frameFormat, final float bandwidth) {
+		setPreviewSize(width, height, DEFAULT_PREVIEW_MIN_FPS, DEFAULT_PREVIEW_MAX_FPS, frameFormat, bandwidth);
+	}
 
 	/**
 	 * Set preview size and preview mode
@@ -380,7 +479,7 @@ public class UVCCamera {
     	}
     	return result;
     }
-
+//================================================================================
     /**
      * @param focus [%]
      */

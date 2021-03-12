@@ -13,6 +13,7 @@ import com.dds.webrtclib.ws.JavaWebSocket;
 
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
+import org.webrtc.PrefSingleton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,6 @@ public class WebRTCManager implements ISignalingEvents {
             _peerHelper = null;
         }
     }
-
 
     public void setCallback(IViewCallback callback) {
         if (_peerHelper != null) {

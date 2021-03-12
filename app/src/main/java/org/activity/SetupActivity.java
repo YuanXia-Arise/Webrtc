@@ -27,7 +27,7 @@ import org.webrtc.PrefSingleton;
 public class SetupActivity extends AppCompatActivity implements View.OnClickListener{
 
     private ImageButton Back;
-    private EditText editText;
+    private EditText editText, psk;
     private Button resolv_one,resolv_two,resolv_thr,resolv_fou,resolv_fiv,resolv_six;
     private Button program_one,program_two,program_thr,program_fou,program_fiv,program_six;
     private Button Enter;
@@ -35,7 +35,7 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         DisplayUtil.setDensity(SetupActivity.this, getApplication());
-        setContentView(R.layout.activity_setting);
+        setContentView(R.layout.activity_settings);
 
         Back = findViewById(R.id.back);
         Back.setOnClickListener(this);
@@ -43,6 +43,8 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         Enter.setOnClickListener(this);
         editText = findViewById(R.id.url);
         editText.setText(PrefSingleton.getInstance().getString("Url"));
+        psk = findViewById(R.id.psw);
+        psk.setText(PrefSingleton.getInstance().getString("psk"));
         init_resolv(); // 初始化分辨率控件
         init_program(); // 初始化键盘方案控件
     }
@@ -256,8 +258,8 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         if (Resolv == 0) {
             Resolv = PrefSingleton.getInstance().getInt("resolv");
         }
-        if (Resolv == 1) {
-            PrefSingleton.getInstance().putInt("resolv",1);
+        if (Resolv == 6) {
+            PrefSingleton.getInstance().putInt("resolv",6);
         } else if (Resolv == 2){
             PrefSingleton.getInstance().putInt("resolv",2);
         } else if (Resolv == 3){
@@ -267,14 +269,14 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         } else if (Resolv == 5){
             PrefSingleton.getInstance().putInt("resolv",5);
         } else {
-            PrefSingleton.getInstance().putInt("resolv",6);
+            PrefSingleton.getInstance().putInt("resolv",1);
         }
 
         if (Program == 0) {
             Program = PrefSingleton.getInstance().getInt("program");
         }
-        if (Program == 1) {
-            PrefSingleton.getInstance().putInt("program",1);
+        if (Program == 6) {
+            PrefSingleton.getInstance().putInt("program",6);
         } else if (Program == 2) {
             PrefSingleton.getInstance().putInt("program",2);
         } else if (Program == 3) {
@@ -284,10 +286,12 @@ public class SetupActivity extends AppCompatActivity implements View.OnClickList
         } else if (Program == 5) {
             PrefSingleton.getInstance().putInt("program",5);
         } else {
-            PrefSingleton.getInstance().putInt("program",6);
+            PrefSingleton.getInstance().putInt("program",1);
         }
 
         PrefSingleton.getInstance().putString("Url",editText.getText().toString());
+        if (psk.getText().toString().equals("")) psk.setText("111111");
+        PrefSingleton.getInstance().putString("psk",psk.getText().toString());
     }
 
 }
