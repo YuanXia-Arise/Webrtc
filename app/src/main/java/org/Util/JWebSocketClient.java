@@ -52,7 +52,7 @@ public class JWebSocketClient extends WebSocketClient {
             while (!PrefSingleton.getInstance().getBoolean("websocket")){
                 try {
                     Thread.sleep(100);
-                    new JWebSocketClient(URI.create("ws://192.168.10.198:3080/key_data_ws?name="
+                    new JWebSocketClient(URI.create("ws://111.111.111.111:8080/key_data_ws?name="
                             + PrefSingleton.getInstance().getString("Imei_id"))).connectBlocking();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
