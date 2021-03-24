@@ -164,7 +164,7 @@
             android:layout_marginTop="20dp"
             android:layout_toRightOf="@+id/image2"
             android:theme="@style/MyEditText"
-            android:hint="请输入服务器地址：139.224.12.24"
+            android:hint="请输入服务器地址"
             android:textColorHint="#FFFFFF"/>
     </RelativeLayout>
 
