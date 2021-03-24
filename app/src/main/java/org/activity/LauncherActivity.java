@@ -355,7 +355,6 @@ public class LauncherActivity extends AppCompatActivity implements View.OnClickL
         }
         URI uri;
         try {
-            //uri = new URI("ws://101.132.186.228:3080/key_data_ws?name=" + imei);
             uri = new URI("ws://" + url + ":3080/key_data_ws?name=" + imei);
         } catch (URISyntaxException e) {
             e.printStackTrace();
