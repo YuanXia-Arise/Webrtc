@@ -150,7 +150,7 @@
             android:layout_marginTop="212dp"
             android:layout_marginLeft="55dp"
             android:theme="@style/MyEditText"
-            android:hint="请输入服务器地址：139.224.12.24"
+            android:hint="请输入服务器地址"
             android:textColorHint="#FFFFFF"/>
 
 
